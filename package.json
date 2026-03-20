@@ -1,0 +1,35 @@
+{
+  "name": "drnon-global-satellite-toolkit",
+  "version": "1.0.0",
+  "description": "Satellite imagery overlay engine — NASA GIBS, Sentinel-2, MODIS, VIIRS, and more via Deck.gl",
+  "author": "DrNon <https://github.com/Nonarkara>",
+  "license": "MIT",
+  "homepage": "https://github.com/Nonarkara/DrNon-Global-Satellite-Toolkit",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Nonarkara/DrNon-Global-Satellite-Toolkit.git"
+  },
+  "keywords": [
+    "satellite",
+    "nasa-gibs",
+    "sentinel-2",
+    "modis",
+    "viirs",
+    "deck.gl",
+    "wmts",
+    "geospatial",
+    "remote-sensing",
+    "earth-observation"
+  ],
+  "dependencies": {
+    "@deck.gl/core": "^9.2.11",
+    "@deck.gl/geo-layers": "^9.2.11",
+    "@deck.gl/layers": "^9.2.11",
+    "@deck.gl/react": "^9.2.11",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}
