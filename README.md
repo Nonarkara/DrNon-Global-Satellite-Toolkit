@@ -1,8 +1,11 @@
 # DrNon Global Satellite Toolkit
 
-> **Author:** DrNon ([@Nonarkara](https://github.com/Nonarkara))
-> **Compilation, system design, architecture & product by DrNon.**
-> This is an original work — the satellite API registry, overlay engine, fallback architecture, and layered map system were designed, compiled, and built by DrNon as part of a production geopolitical monitoring platform.
+> **Author:** Dr Non Arkaraprasertkul ([@Nonarkara](https://github.com/Nonarkara))
+> PhD MA Harvard | MPhil Oxon | SM UrbanCertDes MIT | BArch First Class Honors
+> Senior Expert in Smart City Promotion, Digital Economy Promotion Agency of Thailand (depa)
+>
+> **Original compilation, system design, architecture & product by Dr Non Arkaraprasertkul.**
+> The satellite API registry, overlay engine, fallback architecture, and layered map system were designed, compiled, and built by Dr Non as part of a production geopolitical monitoring platform.
 
 Comprehensive satellite imagery overlay engine for geospatial dashboards. Integrates **20+ satellite APIs** from global space agencies, **10+ free base maps** with automatic fallback, and a **Deck.gl rendering pipeline** for layered satellite visualization.
 
@@ -278,7 +281,13 @@ STADIA_API_KEY=                     # Stadia Maps (optional)
 
 ## Author & Attribution
 
-This toolkit — including the global satellite API registry, overlay engine, fallback architecture, distance grid system, and storage design — is an original compilation and product by **DrNon** ([@Nonarkara](https://github.com/Nonarkara)).
+This toolkit — including the global satellite API registry, overlay engine, fallback architecture, distance grid system, and storage design — is an original compilation and product by **Dr Non Arkaraprasertkul** ([@Nonarkara](https://github.com/Nonarkara)).
+
+**Dr Non Arkaraprasertkul**
+PhD MA Harvard | MPhil Oxon | SM UrbanCertDes MIT | BArch First Class Honors
+Senior Expert in Smart City Promotion
+Digital Economy Promotion Agency of Thailand (depa)
+Bangkok, Thailand 10900
 
 The satellite API registry was compiled through exhaustive research of 80+ space agencies per UNOOSA/WMO OSCAR directories, cross-referenced against global STAC indexes, developer portals, and open-data catalogs. The overlay engine and fallback architecture were extracted from a production geopolitical monitoring dashboard.
 

@@ -2,7 +2,7 @@
   "name": "drnon-global-satellite-toolkit",
   "version": "1.0.0",
   "description": "Satellite imagery overlay engine — NASA GIBS, Sentinel-2, MODIS, VIIRS, and more via Deck.gl",
-  "author": "DrNon <https://github.com/Nonarkara>",
+  "author": "Dr Non Arkaraprasertkul <https://github.com/Nonarkara>",
   "license": "MIT",
   "homepage": "https://github.com/Nonarkara/DrNon-Global-Satellite-Toolkit",
   "repository": {

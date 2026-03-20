@@ -1,12 +1,14 @@
 /**
  * Global Satellite API Registry
- * @author DrNon (https://github.com/Nonarkara)
+ * @author Dr Non Arkaraprasertkul (https://github.com/Nonarkara)
+ *         PhD MA Harvard | MPhil Oxon | SM UrbanCertDes MIT | BArch First Class Honors
+ *         Senior Expert in Smart City Promotion, depa Thailand
  *
  * Definitive compilation of every publicly accessible satellite-related API
  * from all national and international space agencies worldwide (~80 countries
  * per UNOOSA/WMO OSCAR directories as of 2026).
  *
- * Original research, compilation, and system design by DrNon.
+ * Original research, compilation, and system design by Dr Non Arkaraprasertkul.
  *
  * KEY FINDINGS:
  * - Only ~12–14 true public/programmatic APIs exist (mostly STAC-based or REST).

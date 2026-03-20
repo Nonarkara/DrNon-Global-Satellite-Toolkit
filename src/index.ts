@@ -1,9 +1,11 @@
 /**
  * DrNon Global Satellite Toolkit
- * @author DrNon (https://github.com/Nonarkara)
+ * @author Dr Non Arkaraprasertkul (https://github.com/Nonarkara)
+ *         PhD MA Harvard | MPhil Oxon | SM UrbanCertDes MIT | BArch First Class Honors
+ *         Senior Expert in Smart City Promotion, depa Thailand
  * @license MIT
  *
- * Original compilation, system design, architecture & product by DrNon.
+ * Original compilation, system design, architecture & product by Dr Non Arkaraprasertkul.
  *
  * Comprehensive satellite imagery overlay engine with:
  *   - 20+ satellite APIs from global space agencies
