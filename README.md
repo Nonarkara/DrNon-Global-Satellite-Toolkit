@@ -4,12 +4,13 @@
 > PhD MA Harvard | MPhil Oxon | SM UrbanCertDes MIT | BArch First Class Honors
 > Senior Expert in Smart City Promotion, Digital Economy Promotion Agency of Thailand (depa)
 >
+> This started as a hobby project — I wanted to see how many satellite feeds I could layer onto a single map just for the fun of it. Turns out quite a few. Along the way it became something with real potential: a layered geographic mapping system that can surface insights about environment, infrastructure, conflict, economics, and human movement — all from open satellite data that most people don't know is freely available.
+>
 > **Original compilation, system design, architecture & product by Dr Non Arkaraprasertkul.**
-> The satellite API registry, overlay engine, fallback architecture, and layered map system were designed, compiled, and built by Dr Non as part of a production geopolitical monitoring platform.
 
 Comprehensive satellite imagery overlay engine for geospatial dashboards. Integrates **20+ satellite APIs** from global space agencies, **10+ free base maps** with automatic fallback, and a **Deck.gl rendering pipeline** for layered satellite visualization.
 
-Built as a reference implementation and reusable toolkit — extracted from a production geopolitical monitoring dashboard.
+What started as a weekend curiosity — "how many satellite feeds can I stack?" — grew into a toolkit that can help anyone understand what's happening on Earth through open data: fire detection, vegetation health, night-time activity, ocean depth, air quality, precipitation, and more. All free, all open, all layered.
 
 ## Architecture
 
@@ -289,7 +290,9 @@ Senior Expert in Smart City Promotion
 Digital Economy Promotion Agency of Thailand (depa)
 Bangkok, Thailand 10900
 
-The satellite API registry was compiled through exhaustive research of 80+ space agencies per UNOOSA/WMO OSCAR directories, cross-referenced against global STAC indexes, developer portals, and open-data catalogs. The overlay engine and fallback architecture were extracted from a production geopolitical monitoring dashboard.
+This project started as a hobby — pure curiosity about how many satellite feeds could be layered onto a single map. The satellite API registry was compiled through exhaustive research of 80+ space agencies per UNOOSA/WMO OSCAR directories, cross-referenced against global STAC indexes, developer portals, and open-data catalogs. The overlay engine and fallback architecture were extracted from a production geopolitical monitoring dashboard.
+
+The potential goes well beyond the hobby origin. Layered satellite data can surface insights about environmental change, urban growth, disaster response, economic activity, agricultural health, maritime monitoring, and much more — all from open data that most people don't realize is freely available. If this toolkit helps someone see the world a little more clearly, it was worth building.
 
 ## License
 

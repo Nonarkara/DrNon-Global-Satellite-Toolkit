@@ -9,6 +9,8 @@
  * per UNOOSA/WMO OSCAR directories as of 2026).
  *
  * Original research, compilation, and system design by Dr Non Arkaraprasertkul.
+ * Started as a hobby — turns out most of the world's satellite data is free
+ * and nobody has put it all in one place until now.
  *
  * KEY FINDINGS:
  * - Only ~12–14 true public/programmatic APIs exist (mostly STAC-based or REST).

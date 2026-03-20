@@ -6,6 +6,9 @@
  * @license MIT
  *
  * Original compilation, system design, architecture & product by Dr Non Arkaraprasertkul.
+ * Built as a hobby project with serious potential — layered satellite data
+ * can surface insights about environment, infrastructure, conflict, economics,
+ * and human movement, all from open data most people don't know is free.
  *
  * Comprehensive satellite imagery overlay engine with:
  *   - 20+ satellite APIs from global space agencies
