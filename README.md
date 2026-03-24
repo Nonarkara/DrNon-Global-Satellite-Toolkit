@@ -63,8 +63,24 @@ src/
 │   └── copernicus-preview.ts         # Imagery preview endpoint logic
 ├── components/
 │   └── SourceStack.tsx               # React space agency health indicator
-└── data/
-    └── fallbacks.ts                  # Fallback data for offline operation
+├── data/
+│   └── fallbacks.ts                  # Fallback data for offline operation
+└── modules/                          # ← NEW: Pluggable data-source modules
+    ├── registry.ts                   # Central module index (30 modules)
+    ├── _template.ts                  # Copy-paste starter for new modules
+    ├── satellite-freshness.ts        # Image freshness selector with fallback
+    ├── earth-observation/            # NASA FIRMS, GIBS, Sentinel, ISRO, JAXA, GK2A
+    ├── orbital-air-traffic/          # OpenSky, CelesTrak, Space-Track, FlightLabs
+    ├── conflict-events/              # ACLED, GDELT, ReliefWeb, PredictHQ
+    ├── environmental/                # AQI, OpenAQ, AQICN, TMD, Meteoblue
+    ├── news-info/                    # Google Trends, News API, GDELT News
+    ├── thailand/                     # SRT Trains, BTS/MRT, Longdo Traffic, GTFS, Gov Data
+    ├── hooks/
+    │   └── useModuleData.ts          # React hook with auto-polling
+    └── components/
+        ├── ModulePanel.tsx           # Renders any module by uiType
+        ├── ModuleSelector.tsx        # Toggle drawer for enabling modules
+        └── ModuleRail.tsx            # Dynamic tab bar for active modules
 
 ingestion/
 ├── firms_ingest.py                   # NASA FIRMS fire detection pipeline
@@ -266,6 +282,48 @@ GOOGLE_API_KEY=                     # Google API key for Sheets
 NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN=    # Mapbox (optional)
 LONGDO_MAP_KEY=                     # LongDo Map (optional, free)
 STADIA_API_KEY=                     # Stadia Maps (optional)
+```
+
+## Module System (Global Satellite Toolkit)
+
+The module system is a pluggable architecture for integrating dozens of global awareness APIs. Each data source is a self-contained module — one file with fetch logic, mock data, and UI hints. Add or remove modules without touching any other code.
+
+### 30 Modules Across 7 Categories
+
+| Category | Modules | Free? |
+|----------|---------|-------|
+| **Earth Observation** | NASA FIRMS, NASA GIBS, Sentinel Hub, ISRO Bhoonidhi (India), JAXA Tellus (Japan), GK2A (Korea) | Mixed |
+| **Orbital & Air Traffic** | OpenSky Network, CelesTrak, Space-Track, FlightLabs Thai | Mixed |
+| **Conflict & Events** | ACLED, GDELT Events, GDELT News, ReliefWeb, PredictHQ | Mixed |
+| **Environmental** | Open-Meteo AQI, OpenAQ, AQICN Thailand, TMD Weather, Meteoblue, Meteosource | Mixed |
+| **News & Info** | Google Trends, News API | Mixed |
+| **Thailand** | Phuket Smart Bus, SRT Trains, BTS/MRT, Longdo Traffic, Highway Cameras, Gov Open Data, Provinces, GTFS Buses | Free |
+
+### Adding a New Module
+
+1. Copy `src/modules/_template.ts` to the appropriate category folder
+2. Fill in: `id`, `label`, `category`, `fetchData()`, `mockData`, `uiType`
+3. Add one import + one array entry to `src/modules/registry.ts`
+
+That's it. The module appears in the selector and is servable via the dynamic API route.
+
+### Satellite Image Freshness Selector
+
+All earth-observation modules use `selectBestImage()` from `satellite-freshness.ts`:
+
+1. Pick the newest image within N days and under X% cloud cover
+2. If none, pick the newest image within N days (any cloud)
+3. If none, pick the overall newest image (stale fallback)
+
+### React Integration
+
+```tsx
+import { useModuleData } from "./modules/hooks/useModuleData";
+
+function MyComponent() {
+  const { data, loading, error, tier } = useModuleData("gdelt-events");
+  // tier = "live" | "mock" — always renders something
+}
 ```
 
 ## Key Design Decisions

@@ -112,3 +112,31 @@ export {
   fallbackCopernicusPreview,
   fallbackFires,
 } from "./data/fallbacks";
+
+// ── Module System (Global Satellite Toolkit) ────────────────────
+// Pluggable data-source modules with self-contained fetch logic,
+// mock data, and UI rendering hints. Add/remove modules by editing
+// the registry — one file per data source.
+export type {
+  ModuleCategory,
+  ModuleUiType,
+  ModuleDefinition,
+  ModuleMetadata,
+  ModuleApiResponse,
+  ModuleCatalogResponse,
+  ModuleDataState,
+} from "./types/modules";
+export { MODULE_CATEGORY_LABELS } from "./types/modules";
+
+export {
+  getModuleById,
+  getModulesByCategory,
+  getAllModules,
+  getModuleIds,
+  getModuleCatalog,
+  toMetadata,
+} from "./modules/registry";
+
+// ── Satellite Image Freshness Selector ──────────────────────────
+export type { SatelliteImageMeta, FreshnessPolicy } from "./modules/satellite-freshness";
+export { selectBestImage, classifyFreshness } from "./modules/satellite-freshness";
