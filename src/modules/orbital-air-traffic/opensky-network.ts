@@ -1,4 +1,5 @@
 import type { ModuleDefinition } from "../../types/modules";
+import { internalUrl } from "../lib/module-fetch";
 
 interface FlightData {
   icao24: string;
@@ -30,7 +31,7 @@ export const openSkyNetwork: ModuleDefinition<FlightData[]> = {
   ],
 
   async fetchData() {
-    const res = await fetch("http://127.0.0.1:3000/api/flights", {
+    const res = await fetch(internalUrl("/api/flights"), {
       signal: AbortSignal.timeout(10000),
     });
     if (!res.ok) throw new Error(`OpenSky proxy: ${res.status}`);

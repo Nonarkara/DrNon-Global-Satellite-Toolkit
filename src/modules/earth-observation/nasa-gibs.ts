@@ -1,4 +1,5 @@
 import type { ModuleDefinition } from "../../types/modules";
+import { internalUrl } from "../lib/module-fetch";
 
 interface GibsLayer {
   id: string;
@@ -26,7 +27,7 @@ export const nasaGibs: ModuleDefinition<GibsLayer[]> = {
   ],
 
   async fetchData() {
-    const res = await fetch("http://127.0.0.1:3000/api/map/overlays", {
+    const res = await fetch(internalUrl("/api/map/overlays"), {
       signal: AbortSignal.timeout(10000),
     });
     if (!res.ok) throw new Error(`GIBS proxy: ${res.status}`);

@@ -1,4 +1,5 @@
 import type { ModuleDefinition } from "../../types/modules";
+import { internalUrl } from "../lib/module-fetch";
 
 interface FireEvent {
   latitude: number;
@@ -26,7 +27,7 @@ export const nasaFirms: ModuleDefinition<FireEvent[]> = {
   ],
 
   async fetchData() {
-    const res = await fetch("http://127.0.0.1:3000/api/fires", {
+    const res = await fetch(internalUrl("/api/fires"), {
       signal: AbortSignal.timeout(10000),
     });
     if (!res.ok) throw new Error(`FIRMS proxy: ${res.status}`);

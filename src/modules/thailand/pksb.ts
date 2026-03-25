@@ -1,4 +1,5 @@
 import type { ModuleDefinition } from "../../types/modules";
+import { internalUrl } from "../lib/module-fetch";
 
 interface BusPosition {
   id: string;
@@ -27,7 +28,7 @@ export const pksbTransit: ModuleDefinition<BusPosition[]> = {
   ],
 
   async fetchData() {
-    const res = await fetch("http://127.0.0.1:3000/api/transit/pksb", {
+    const res = await fetch(internalUrl("/api/transit/pksb"), {
       signal: AbortSignal.timeout(10000),
     });
     if (!res.ok) throw new Error(`PKSB proxy: ${res.status}`);

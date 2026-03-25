@@ -1,0 +1,114 @@
+@import "tailwindcss";
+
+:root {
+  --font-ui: "SF Pro Display", "Avenir Next", "Segoe UI", "Trebuchet MS", sans-serif;
+  --font-mono: "IBM Plex Mono", "SF Mono", "JetBrains Mono", monospace;
+  --bg: #efede5;
+  --bg-raised: #f5f3ec;
+  --bg-surface: rgba(245, 243, 236, 0.94);
+  --panel: rgba(248, 246, 240, 0.9);
+  --panel-strong: rgba(251, 249, 244, 0.98);
+  --line: rgba(17, 17, 17, 0.1);
+  --line-bright: rgba(17, 17, 17, 0.16);
+  --ink: #111111;
+  --muted: #4f4f4f;
+  --dim: #858585;
+  --accent: #111111;
+  --accent-soft: #767676;
+  --cool: #0f6f88;
+  --cool-dim: rgba(15, 111, 136, 0.1);
+  --danger: #ef4444;
+  --success: #22c55e;
+  --shadow: none;
+  --glow: none;
+}
+
+html {
+  min-height: 100%;
+}
+
+body {
+  min-height: 100%;
+  background:
+    radial-gradient(circle at top, rgba(15, 111, 136, 0.05), transparent 28%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.38) 0%, rgba(239, 237, 229, 0.98) 100%);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.dashboard-panel {
+  border: 1px solid var(--line);
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(16px);
+}
+
+.dashboard-panel-strong {
+  border: 1px solid var(--line-bright);
+  background: var(--panel-strong);
+  box-shadow: var(--shadow), var(--glow);
+  backdrop-filter: blur(20px);
+}
+
+.eyebrow {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--dim);
+}
+
+.live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink);
+  background: transparent;
+}
+
+.live-badge::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--danger);
+  animation: pulse-dot 1.8s ease-in-out infinite;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.3);
+  border-radius: 999px;
+}
+
+::selection {
+  background: rgba(17, 17, 17, 0.12);
+}

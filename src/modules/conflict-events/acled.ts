@@ -1,4 +1,5 @@
 import type { ModuleDefinition } from "../../types/modules";
+import { internalUrl } from "../lib/module-fetch";
 
 interface AcledEvent {
   event_date: string;
@@ -25,7 +26,7 @@ export const acled: ModuleDefinition<AcledEvent[]> = {
   requiredEnvVars: ["ACLED_KEY"],
 
   async fetchData() {
-    const res = await fetch("http://127.0.0.1:3000/api/incidents", {
+    const res = await fetch(internalUrl("/api/incidents"), {
       signal: AbortSignal.timeout(10000),
     });
     if (!res.ok) throw new Error(`ACLED proxy: ${res.status}`);

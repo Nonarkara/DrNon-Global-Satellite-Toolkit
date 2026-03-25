@@ -1,4 +1,5 @@
 import type { ModuleDefinition } from "../../types/modules";
+import { internalUrl } from "../lib/module-fetch";
 
 interface TrendingTopic {
   keyword: string;
@@ -20,7 +21,7 @@ export const googleTrends: ModuleDefinition<TrendingTopic[]> = {
   ],
 
   async fetchData() {
-    const res = await fetch("http://127.0.0.1:3000/api/trends", {
+    const res = await fetch(internalUrl("/api/trends"), {
       signal: AbortSignal.timeout(10000),
     });
     if (!res.ok) throw new Error(`Trends proxy: ${res.status}`);

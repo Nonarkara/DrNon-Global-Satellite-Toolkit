@@ -1,4 +1,5 @@
 import type { ModuleDefinition } from "../../types/modules";
+import { internalUrl } from "../lib/module-fetch";
 
 interface AirQualityPoint {
   label: string;
@@ -26,7 +27,7 @@ export const openMeteoAqi: ModuleDefinition<AirQualityPoint[]> = {
   ],
 
   async fetchData() {
-    const res = await fetch("http://127.0.0.1:3000/api/air-quality", {
+    const res = await fetch(internalUrl("/api/air-quality"), {
       signal: AbortSignal.timeout(10000),
     });
     if (!res.ok) throw new Error(`AQI proxy: ${res.status}`);

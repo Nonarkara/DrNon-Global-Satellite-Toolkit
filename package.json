@@ -1,7 +1,7 @@
 {
   "name": "drnon-global-satellite-toolkit",
-  "version": "1.0.0",
-  "description": "Satellite imagery overlay engine — NASA GIBS, Sentinel-2, MODIS, VIIRS, and more via Deck.gl",
+  "version": "2.0.0",
+  "description": "Dashboard template — satellite imagery, global awareness APIs, and pluggable data modules via Deck.gl + Next.js",
   "author": "Dr Non Arkaraprasertkul <https://github.com/Nonarkara>",
   "license": "MIT",
   "homepage": "https://github.com/Nonarkara/DrNon-Global-Satellite-Toolkit",
@@ -19,17 +19,34 @@
     "wmts",
     "geospatial",
     "remote-sensing",
-    "earth-observation"
+    "earth-observation",
+    "dashboard-template",
+    "next.js"
   ],
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
   "dependencies": {
     "@deck.gl/core": "^9.2.11",
     "@deck.gl/geo-layers": "^9.2.11",
     "@deck.gl/layers": "^9.2.11",
     "@deck.gl/react": "^9.2.11",
+    "@tailwindcss/postcss": "^4",
+    "clsx": "^2.1.1",
+    "postcss": "^8",
+    "tailwindcss": "^4",
+    "lucide-react": "^0.460.0",
+    "next": "^15.3.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
     "typescript": "^5"
   }
 }
