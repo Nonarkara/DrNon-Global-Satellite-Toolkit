@@ -110,14 +110,18 @@ export const optionalProviders: SatelliteProviderDescriptor[] = [
   },
   {
     id: "gistda-gflood",
-    label: "GISTDA GFlood",
+    label: "GISTDA Disaster Platform maps",
     category: "Disaster",
     description:
-      "Public WMS/WMTS flood services from GISTDA. Attribute GISTDA. Do not scrape FloodDash.",
-    surfaces: ["Flood polygons", "Rain raster", "2011 flood footprint tiles"],
+      "Open API WMS/WMTS/TMS for flood, fire, and drought. Attribute GISTDA. Do not scrape FloodDash or /app-api/proxy.",
+    surfaces: ["Flood 1/3/7/30-day tiles", "VIIRS / burn-scar tiles", "Drought DRI/NDWI/SMAP 7-day"],
     endpoints: [
-      "https://gistdaportal.gistda.or.th/data/rest/services/GFlood",
-      "https://gistdaportal.gistda.or.th/data/services/GFlood/GFlood_Inno_WMS/MapServer/WMSServer",
+      "https://api-gateway.gistda.or.th/api/2.0/resources/maps/flood/1day/wms",
+      "https://api-gateway.gistda.or.th/api/2.0/resources/maps/flood/1day/tms/{z}/{x}/{y}",
+      "https://api-gateway.gistda.or.th/api/2.0/resources/maps/viirs/1day/wms",
+      "https://api-gateway.gistda.or.th/api/2.0/resources/maps/dri/7days/wms",
+      "https://disaster.gistda.or.th/services/open-api",
+      "https://disaster.gistda.or.th/services/stac",
     ],
     optional: true,
   },

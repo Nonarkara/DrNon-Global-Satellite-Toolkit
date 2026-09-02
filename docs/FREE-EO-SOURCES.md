@@ -18,8 +18,8 @@ flowchart TB
     UI[Module panels + map overlays]
   end
   subgraph gistda [GISTDA]
-    GW[API Gateway flood / burnt / recurrence]
-    OGC[GFlood WMS / WMTS]
+    GW[Open API /features flood VIIRS burn]
+    OGC[Open API /maps WMS WMTS TMS]
   end
   subgraph nasa [NASA]
     GIBS[GIBS WMTS]
@@ -153,10 +153,11 @@ Unauthenticated calls to the gateway return **HTTP 407 Authentication Required**
 
 | Kind | Paths (append to base) | Evidence |
 |------|------------------------|----------|
-| Flood features | `/features/flood/1day`, `/3days`, `/7days`, `/30days`, `/features/flood-freq`, `/features/water_hyacinth` | Mapped flood features / historical frequency |
-| Flood maps | `/maps/flood/{1day,3days,7days,30days}/{wms\|wmts\|tms/{z}/{x}/{y}}`, `/maps/flood-freq/{wms\|wmts\|tms/...}` | **Primary live civic tiles** (key required) |
-| Fire | `/features/viirs/{1day,3days,7days,30days}`, `/features/burn-freq`, `/features/burn-scar` + matching `/maps/viirs\|burn-freq\|burn-scar` | VIIRS hotspots / burn scar / frequency |
-| Drought maps | `/maps/dri\|ndwi\|smap/7days/{wms\|wmts\|tms/...}` | 7-day drought indices. GISTDA `smap` map ≠ NASA SMAP L4 GIBS |
+| Flood features | `/features/flood/1day`, `/features/flood/3days`, `/features/flood/7days`, `/features/flood/30days`, `/features/flood-freq`, `/features/water_hyacinth` | Mapped flood features / historical frequency |
+| Flood maps | `/maps/flood/{1day,3days,7days,30days}/{wms\|wmts\|tms/{z}/{x}/{y}}`, `/maps/flood-freq/{wms\|wmts\|tms/{z}/{x}/{y}}` | **Primary live civic tiles** (key required) |
+| Fire features | `/features/viirs/1day`, `/features/viirs/3days`, `/features/viirs/7days`, `/features/viirs/30days`, `/features/burn-freq`, `/features/burn-scar` | VIIRS hotspots / burn scar / frequency |
+| Fire maps | `/maps/viirs/{1day,3days,7days,30days}/{wms\|wmts\|tms/{z}/{x}/{y}}`, `/maps/burn-freq/{wms\|wmts\|tms/{z}/{x}/{y}}`, `/maps/burn-scar/{wms\|wmts\|tms/{z}/{x}/{y}}` | Matching map templates for the fire feature feeds |
+| Drought maps | `/maps/dri/7days/{wms\|wmts\|tms/{z}/{x}/{y}}`, `/maps/ndwi/7days/{wms\|wmts\|tms/{z}/{x}/{y}}`, `/maps/smap/7days/{wms\|wmts\|tms/{z}/{x}/{y}}` | 7-day drought indices. GISTDA `smap` map ≠ NASA SMAP L4 GIBS |
 
 Example TMS: `https://api-gateway.gistda.or.th/api/2.0/resources/maps/flood/1day/tms/{z}/{x}/{y}` (send `api_key`).
 
@@ -208,8 +209,8 @@ Attribution: [Weather data by Open-Meteo.com](https://open-meteo.com/).
 
 | Module id | Live without a key? | Wraps |
 |-----------|---------------------|--------|
-| `gistda-gateway` | No (`GISTDA_API_KEY`) | Open API `/features/flood|viirs|burn-*` |
-| `gistda-gflood` | Yes (ArcGIS directory) | Open API map templates + public GFlood WMS/WMTS |
+| `gistda-gateway` | Yes (path catalog; GeoJSON needs `GISTDA_API_KEY`) | Exact `/features/flood|flood-freq|water_hyacinth|viirs|burn-*` inventory |
+| `gistda-gflood` | Yes (map catalog) | Exact `/maps/flood|flood-freq|viirs|burn-*|dri|ndwi|smap` WMS/WMTS/TMS |
 | `jaxa-gsmap` | Yes (portal + NICT probe) | GSMaP + Himawari freshness |
 | `copernicus-cdse` | Yes (STAC search) | CDSE Sentinel-1/2 catalog |
 | `open-meteo-forecast` | Yes | Open-Meteo forecast |

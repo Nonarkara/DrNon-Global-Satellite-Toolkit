@@ -149,8 +149,8 @@ The module system is the core innovation. Each data source is a **self-contained
 | JAXA Tellus | JAXA (Japan) | ALOS, GCOM, Himawari data for Asia-Pacific |
 | JAXA GSMaP + Himawari | JAXA / NICT | GSMaP rainfall watch + Himawari browse freshness (estimated rain, not gauges) |
 | GK2A | KMA (Korea) | Geostationary weather imagery for East/Southeast Asia |
-| GISTDA Gateway | GISTDA | Thai flood extent, flood/drought recurrence, burnt area (free API key) |
-| GISTDA GFlood | GISTDA | Public WMS/WMTS flood services — live polygons + 2011 flood tile cache |
+| GISTDA Gateway | GISTDA | Open API `/features/flood/{1day,3days,7days,30days}`, flood-freq, water_hyacinth, VIIRS, burn-scar/freq |
+| GISTDA GFlood | GISTDA | Open API `/maps/flood|flood-freq|viirs|burn-*|dri|ndwi|smap` WMS/WMTS/TMS |
 
 ### Orbital & Air Traffic (4 modules)
 | Module | Source | What It Shows |
@@ -245,15 +245,15 @@ Most people think satellite data is expensive or classified. It's not. **The maj
 | **INPE STAC** | INPE | Brazil | STAC | CBERS, Amazonia-1 |
 | **JAXA Earth** | JAXA | Japan | REST | ALOS, GCOM, Himawari |
 | **JAXA GSMaP** | JAXA | Japan | REST/FTP | Global satellite rainfall estimates |
-| **GISTDA Gateway** | GISTDA | Thailand | REST | Thai flood / burnt / recurrence |
-| **GISTDA GFlood** | GISTDA | Thailand | WMS/WMTS | Thai flood OGC tiles |
+| **GISTDA Gateway** | GISTDA | Thailand | REST | Open API `/features/flood|flood-freq|viirs|burn-*` |
+| **GISTDA GFlood** | GISTDA | Thailand | WMS/WMTS/TMS | Open API `/maps/flood|viirs|dri|ndwi|smap` |
 | **Roscosmos STAC** | Roscosmos | Russia | STAC | Resurs-P, Kanopus-V |
 
 ### Portal-Only Agencies (No Public API)
 
-~65-70 agencies have **zero public APIs** for their national satellite archives. Notable examples: China (CNSA/CRESDA Gaofen), South Korea (KARI/KOMPSAT), Argentina (CONAE/SAOCOM), Thailand **THEOS** (GISTDA archive — *disaster products are public; see below*), Algeria, Turkey, UAE, Iran, Mexico, Indonesia, Vietnam, Philippines.
+~65-70 agencies have **zero public APIs** for their national satellite archives. Notable examples: China (CNSA/CRESDA Gaofen), South Korea (KARI/KOMPSAT), Argentina (CONAE/SAOCOM), Algeria, Turkey, UAE, Iran, Mexico, Indonesia, Vietnam, Philippines.
 
-**GISTDA is no longer “no public API” for disasters.** THEOS scene download remains portal/commercial, but the [GISTDA API Gateway](https://api-gateway.gistda.or.th/v2) and [GFlood OGC services](https://gistdaportal.gistda.or.th/data/rest/services/GFlood) expose flood extent, flood/drought recurrence, burnt area, and WMS/WMTS. Catalog: [opendata.gistda.or.th](https://opendata.gistda.or.th). Full URLs and attribution: [`docs/FREE-EO-SOURCES.md`](docs/FREE-EO-SOURCES.md).
+**GISTDA has a public Disaster Platform Open API** (this is not portal-only). Base `https://api-gateway.gistda.or.th/api/2.0/resources`, docs https://disaster.gistda.or.th/services/open-api, STAC UI https://disaster.gistda.or.th/services/stac. Flood/fire/drought features and WMS/WMTS/TMS are listed in [`docs/FREE-EO-SOURCES.md`](docs/FREE-EO-SOURCES.md). THEOS scene archive remains commercial/portal. Do not scrape FloodDash or `/app-api/proxy` internals. Env name only: `GISTDA_API_KEY`.
 
 Full details with endpoints in [`src/registry/global-satellite-apis.ts`](src/registry/global-satellite-apis.ts).
 
@@ -303,7 +303,7 @@ echo "FIRMS_KEY=your_key_here" > .env.local
 npm run dev
 ```
 
-Enable these modules in the UI: **NASA FIRMS** + **GISTDA GFlood** + **JAXA GSMaP + Himawari** + **Copernicus CDSE** + **Open-Meteo Forecast** + **ReliefWeb**. Add `GISTDA_API_KEY` for live flood/burnt point queries. You now have fire detection, Thai flood tiles, estimated rainfall, Sentinel catalog, modelled weather, and humanitarian alerts — with mock fallbacks if keys are missing.
+Enable these modules in the UI: **NASA FIRMS** + **GISTDA Gateway** + **GISTDA GFlood** + **JAXA GSMaP + Himawari** + **Copernicus CDSE** + **Open-Meteo Forecast** + **ReliefWeb**. Add `GISTDA_API_KEY` to fetch live Open API GeoJSON (`/features/flood|viirs|burn-*`) and tiles (`/maps/flood|viirs|dri|ndwi|smap`). You now have fire detection, Thai flood/fire/drought products, estimated rainfall, Sentinel catalog, modelled weather, and humanitarian alerts — with mock fallbacks if keys are missing.
 
 Free-EO catalog (real URLs, measured vs modelled, GISTDA attribution, Earth Engine licence): [`docs/FREE-EO-SOURCES.md`](docs/FREE-EO-SOURCES.md).
 

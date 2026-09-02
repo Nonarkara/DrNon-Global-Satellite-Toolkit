@@ -84,8 +84,8 @@ Enable relevant modules in `src/modules/registry.ts` by keeping/removing entries
 - `jaxa-tellus` — JAXA Earth observation
 - `jaxa-gsmap` — JAXA GSMaP rainfall + Himawari browse freshness
 - `gk2a-korea` — GK2A geostationary weather
-- `gistda-gateway` — Thai flood/burnt/recurrence point APIs (needs GISTDA_API_KEY)
-- `gistda-gflood` — Public GFlood WMS/WMTS metadata (no key)
+- `gistda-gateway` — Open API `/features/flood/{1day,3days,7days,30days}`, flood-freq, water_hyacinth, `/features/viirs/…`, burn-scar, burn-freq. Catalog works without a key; GeoJSON needs GISTDA_API_KEY
+- `gistda-gflood` — Open API `/maps/flood|flood-freq|viirs|burn-*|dri|ndwi|smap` WMS/WMTS/TMS templates
 
 **Orbital & Air Traffic**:
 - `opensky-network` — Real-time flight tracking (wraps /api/flights)
