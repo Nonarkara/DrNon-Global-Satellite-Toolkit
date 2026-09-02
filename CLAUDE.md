@@ -12,7 +12,7 @@ npm run dev
 # Open http://localhost:3000
 ```
 
-All 30 modules render mock data with zero API keys. Add keys to `.env` to activate live data.
+All modules render mock data with zero API keys. Add keys to `.env` to activate live data.
 
 ## Architecture
 
@@ -34,7 +34,7 @@ src/
 │   │   ├── ModulePanel.tsx               # Renders any module by uiType
 │   │   ├── ModuleSelector.tsx            # Drawer to toggle modules on/off
 │   │   └── ModuleRail.tsx                # Tab bar for enabled modules
-│   ├── earth-observation/                # NASA FIRMS, GIBS, Sentinel, ISRO, JAXA, GK2A
+│   ├── earth-observation/                # NASA FIRMS, GIBS, POWER, SMAP, Sentinel Hub, CDSE, ISRO, JAXA, GK2A, GISTDA
 │   ├── orbital-air-traffic/              # OpenSky, CelesTrak, Space-Track, FlightLabs
 │   ├── conflict-events/                  # ACLED, GDELT, ReliefWeb, PredictHQ
 │   ├── environmental/                    # AQI, OpenAQ, AQICN, TMD, Meteoblue
@@ -76,10 +76,16 @@ Enable relevant modules in `src/modules/registry.ts` by keeping/removing entries
 **Earth Observation** (no key needed unless noted):
 - `nasa-firms` — Fire detection (wraps /api/fires)
 - `nasa-gibs` — Satellite imagery tiles (wraps /api/map/overlays)
+- `nasa-power` — NASA POWER daily climate (modelled GEOS fields, free)
+- `nasa-smap` — SMAP L4 soil-moisture GIBS browse (modelled analysis)
 - `sentinel-hub` — Processed Sentinel imagery (needs SENTINEL_HUB_KEY)
+- `copernicus-cdse` — Native CDSE STAC search for Sentinel-1 GRD + Sentinel-2 L2A (catalog public)
 - `isro-bhoonidhi` — ISRO 46-satellite archive
 - `jaxa-tellus` — JAXA Earth observation
+- `jaxa-gsmap` — JAXA GSMaP rainfall + Himawari browse freshness
 - `gk2a-korea` — GK2A geostationary weather
+- `gistda-gateway` — Thai flood/burnt/recurrence point APIs (needs GISTDA_API_KEY)
+- `gistda-gflood` — Public GFlood WMS/WMTS metadata (no key)
 
 **Orbital & Air Traffic**:
 - `opensky-network` — Real-time flight tracking (wraps /api/flights)
@@ -96,6 +102,7 @@ Enable relevant modules in `src/modules/registry.ts` by keeping/removing entries
 
 **Environmental**:
 - `open-meteo-aqi` — Air quality (wraps /api/air-quality)
+- `open-meteo-forecast` — 7-day NWP forecast for Thai civic cities (free, modelled)
 - `openaq` — Global AQ stations (free, no key)
 - `aqicn-thailand` — Thai PM2.5 stations (free, no key)
 - `tmd-weather` — Thai Met Dept forecasts (free, no key)

@@ -13,7 +13,7 @@
  * Comprehensive satellite imagery overlay engine with:
  *   - 20+ satellite APIs from global space agencies
  *   - 10+ free base map options with automatic fallback
- *   - 10 raster satellite overlays (VIIRS, MODIS, Sentinel-2, etc.)
+ *   - 12 raster satellite overlays (VIIRS, MODIS, Sentinel-2, SMAP, GISTDA GFlood, etc.)
  *   - Distance grids (500m–10km) with nautical mile support
  *   - NASA FIRMS fire detection ingestion
  *   - Multi-backend storage (Supabase, Firebase, PostgreSQL, Google Sheets)

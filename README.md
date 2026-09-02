@@ -16,7 +16,7 @@ A production-grade, open-source framework for building satellite-powered dashboa
 
 This is not a satellite viewer. It's a **blueprint for building real-time global awareness systems**.
 
-42,000+ lines of TypeScript. 30 pluggable data-source modules. 20+ satellite APIs from 80+ space agencies surveyed worldwide. A rendering pipeline that layers fire detection over vegetation indices over night-time lights over ocean bathymetry — on any base map, with any combination, and it always renders even when APIs go down.
+42,000+ lines of TypeScript. 37 pluggable data-source modules. 20+ satellite APIs from 80+ space agencies surveyed worldwide. A rendering pipeline that layers fire detection over vegetation indices over night-time lights over ocean bathymetry — on any base map, with any combination, and it always renders even when APIs go down.
 
 It started as a hobby — "how many satellite feeds can I stack onto one map?" — and turned into the toolkit that powers production monitoring dashboards for smart city programs.
 
@@ -102,12 +102,12 @@ It started as a hobby — "how many satellite feeds can I stack onto one map?" �
 └─────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────┐
-│                     MODULE SYSTEM (30 data sources)                 │
+│                     MODULE SYSTEM (37 data sources)                 │
 ├─────────────────────────────────────────────────────────────────────┤
-│  Earth Observation    │  NASA FIRMS, GIBS, Sentinel, ISRO, JAXA    │
+│  Earth Observation    │  NASA, Sentinel/CDSE, ISRO, JAXA, GISTDA   │
 │  Orbital & Air        │  OpenSky, CelesTrak, Space-Track, Flights  │
 │  Conflict & Events    │  ACLED, GDELT, ReliefWeb, PredictHQ        │
-│  Environmental        │  AQI, OpenAQ, TMD, Meteoblue, Meteosource  │
+│  Environmental        │  AQI, Open-Meteo wx, OpenAQ, TMD, Meteo    │
 │  News & Trends        │  Google Trends, News API, GDELT News       │
 │  Thailand-specific    │  SRT Trains, BTS/MRT, Smart Bus, Highways  │
 ├─────────────────────────────────────────────────────────────────────┤
@@ -132,19 +132,25 @@ Every tile fetch records metadata — provider, timestamp, latency, imagery date
 
 ---
 
-## 30 Pluggable Data-Source Modules
+## 37 Pluggable Data-Source Modules
 
 The module system is the core innovation. Each data source is a **self-contained file** — one file per API, with fetch logic, realistic mock data, and UI rendering hints. Add or remove modules by editing one line in the registry.
 
-### Earth Observation (6 modules)
+### Earth Observation (12 modules)
 | Module | Source | What It Shows |
 |--------|--------|---------------|
 | NASA FIRMS | NASA | Active fire/thermal hotspots worldwide, updated every 3 hours |
 | NASA GIBS | NASA | 1,000+ daily satellite imagery layers via WMTS tiles |
-| Sentinel Hub | ESA | Processed Sentinel-2 + Landsat with custom band combinations |
+| NASA POWER | NASA Langley | Daily 2 m temperature and precipitation for civic points (modelled GEOS fields) |
+| NASA SMAP | NASA / NSIDC | L4 soil-moisture GIBS browse — drought context, modelled analysis not a probe |
+| Sentinel Hub | ESA / Sinergise | Processed Sentinel-2 + Landsat with custom band combinations |
+| Copernicus CDSE | ESA CDSE | Native STAC search for Sentinel-2 L2A and Sentinel-1 GRD over Thailand |
 | ISRO Bhoonidhi | ISRO (India) | Resourcesat, NovaSAR, EOS data for South/Southeast Asia |
 | JAXA Tellus | JAXA (Japan) | ALOS, GCOM, Himawari data for Asia-Pacific |
+| JAXA GSMaP + Himawari | JAXA / NICT | GSMaP rainfall watch + Himawari browse freshness (estimated rain, not gauges) |
 | GK2A | KMA (Korea) | Geostationary weather imagery for East/Southeast Asia |
+| GISTDA Gateway | GISTDA | Thai flood extent, flood/drought recurrence, burnt area (free API key) |
+| GISTDA GFlood | GISTDA | Public WMS/WMTS flood services — live polygons + 2011 flood tile cache |
 
 ### Orbital & Air Traffic (4 modules)
 | Module | Source | What It Shows |
@@ -163,10 +169,11 @@ The module system is the core innovation. Each data source is a **self-contained
 | ReliefWeb | UN OCHA | Humanitarian disaster reports, situation updates, maps |
 | PredictHQ | PredictHQ | Scheduled + unscheduled real-world events with impact scoring |
 
-### Environmental (6 modules)
+### Environmental (7 modules)
 | Module | Source | What It Shows |
 |--------|--------|---------------|
 | Open-Meteo AQI | Open-Meteo | Free global air quality index with PM2.5, NO₂, O₃ |
+| Open-Meteo Forecast | Open-Meteo | 7-day NWP forecast for Thai civic cities (modelled, not TMD stations) |
 | OpenAQ | OpenAQ | Ground-station air quality measurements worldwide |
 | AQICN Thailand | AQICN | Thai-specific AQI with station-level PM2.5 readings |
 | TMD Weather | Thai Met Dept | Official Thai weather warnings and forecasts |
@@ -205,7 +212,9 @@ Most people think satellite data is expensive or classified. It's not. **The maj
 | API | Agency | Auth | Protocol | Coverage |
 |-----|--------|------|----------|----------|
 | **Sentinel Hub** | ESA | OAuth | STAC | Global — all Sentinel, Landsat, MODIS |
-| **Google Earth Engine** | Google | OAuth | REST | Planetary-scale — petabytes |
+| **Google Earth Engine** | Google | OAuth | REST | Planetary-scale analysis — **not** a free gov tile CDN (see ethics) |
+| **Copernicus CDSE STAC** | ESA | None (search) | STAC | Sentinel-1/2 catalog; downloads need a CDSE account |
+| **NASA POWER** | NASA | None | REST | Daily climate ARD (modelled GEOS) |
 | **NASA GIBS** | NASA | None | WMTS | Global — 1,000+ daily layers |
 | **NASA CMR STAC** | NASA | None | STAC | All NASA data holdings |
 | **Planet Labs** | Planet | API Key | REST | Global daily 3-5m optical |
@@ -235,11 +244,16 @@ Most people think satellite data is expensive or classified. It's not. **The maj
 | **CSA Open Data** | CSA | Canada | REST | RADARSAT, NEOSSat |
 | **INPE STAC** | INPE | Brazil | STAC | CBERS, Amazonia-1 |
 | **JAXA Earth** | JAXA | Japan | REST | ALOS, GCOM, Himawari |
+| **JAXA GSMaP** | JAXA | Japan | REST/FTP | Global satellite rainfall estimates |
+| **GISTDA Gateway** | GISTDA | Thailand | REST | Thai flood / burnt / recurrence |
+| **GISTDA GFlood** | GISTDA | Thailand | WMS/WMTS | Thai flood OGC tiles |
 | **Roscosmos STAC** | Roscosmos | Russia | STAC | Resurs-P, Kanopus-V |
 
 ### Portal-Only Agencies (No Public API)
 
-~65-70 agencies have **zero public APIs**. Notable examples: China (CNSA/CRESDA Gaofen), South Korea (KARI/KOMPSAT), Argentina (CONAE/SAOCOM), Thailand (GISTDA/THEOS), Algeria, Turkey, UAE, Iran, Mexico, Indonesia, Vietnam, Philippines.
+~65-70 agencies have **zero public APIs** for their national satellite archives. Notable examples: China (CNSA/CRESDA Gaofen), South Korea (KARI/KOMPSAT), Argentina (CONAE/SAOCOM), Thailand **THEOS** (GISTDA archive — *disaster products are public; see below*), Algeria, Turkey, UAE, Iran, Mexico, Indonesia, Vietnam, Philippines.
+
+**GISTDA is no longer “no public API” for disasters.** THEOS scene download remains portal/commercial, but the [GISTDA API Gateway](https://api-gateway.gistda.or.th/v2) and [GFlood OGC services](https://gistdaportal.gistda.or.th/data/rest/services/GFlood) expose flood extent, flood/drought recurrence, burnt area, and WMS/WMTS. Catalog: [opendata.gistda.or.th](https://opendata.gistda.or.th). Full URLs and attribution: [`docs/FREE-EO-SOURCES.md`](docs/FREE-EO-SOURCES.md).
 
 Full details with endpoints in [`src/registry/global-satellite-apis.ts`](src/registry/global-satellite-apis.ts).
 
@@ -247,7 +261,7 @@ Full details with endpoints in [`src/registry/global-satellite-apis.ts`](src/reg
 
 ## Satellite Imagery Overlays
 
-10 raster overlays from 6 providers, all consumable via standard WMTS tiles:
+10 raster overlays from 6 providers, plus SMAP soil moisture and GISTDA GFlood 2011, all consumable via standard WMTS/XYZ tiles:
 
 | Overlay | Source | What It Reveals |
 |---------|--------|-----------------|
@@ -261,6 +275,8 @@ Full details with endpoints in [`src/registry/global-satellite-apis.ts`](src/reg
 | Sentinel-2 Cloudless | EOX/ESA | Cloud-free annual composite at 10m resolution |
 | Surface Water | JRC/Google | Every lake, river, and reservoir mapped and tracked over time |
 | Ocean Bathymetry | EMODnet/GEBCO | Seafloor depth for maritime and coastal analysis |
+| SMAP Surface Moisture | NASA GIBS / SMAP L4 | Modelled land-surface soil moisture (not an in-situ probe) |
+| GISTDA GFlood 2011 | GISTDA | Historical 2011 flood footprint tiles — not live inundation |
 
 ---
 
@@ -287,7 +303,9 @@ echo "FIRMS_KEY=your_key_here" > .env.local
 npm run dev
 ```
 
-Enable these modules in the UI: **NASA FIRMS** + **ReliefWeb** + **Open-Meteo AQI** + **GDELT Events**. You now have a working disaster monitoring dashboard with fire detection, humanitarian alerts, air quality, and news event correlation.
+Enable these modules in the UI: **NASA FIRMS** + **GISTDA GFlood** + **JAXA GSMaP + Himawari** + **Copernicus CDSE** + **Open-Meteo Forecast** + **ReliefWeb**. Add `GISTDA_API_KEY` for live flood/burnt point queries. You now have fire detection, Thai flood tiles, estimated rainfall, Sentinel catalog, modelled weather, and humanitarian alerts — with mock fallbacks if keys are missing.
+
+Free-EO catalog (real URLs, measured vs modelled, GISTDA attribution, Earth Engine licence): [`docs/FREE-EO-SOURCES.md`](docs/FREE-EO-SOURCES.md).
 
 ### Example: Build a Smart City Command Center
 
@@ -400,7 +418,8 @@ FIRMS_KEY=                          # NASA FIRMS thermal detection (free)
 # Module API keys (all optional — mock data used when absent)
 ACLED_KEY=                          # Armed conflict data
 ACLED_EMAIL=                        # ACLED registration email
-SENTINEL_HUB_KEY=                   # ESA processed imagery
+SENTINEL_HUB_KEY=                   # ESA processed imagery (classic Sentinel Hub)
+GISTDA_API_KEY=                     # GISTDA disaster gateway (register at api-gateway.gistda.or.th/v2)
 SPACE_TRACK_USER=                   # NORAD orbital catalog
 SPACE_TRACK_PASS=
 FLIGHTLABS_KEY=                     # Aviation data
@@ -433,6 +452,37 @@ SUPABASE_ANON_KEY=
 5. **One file per data source** — Adding a module never requires editing more than 2 files (the module itself + one line in the registry). Removing a module is the reverse.
 
 6. **Metadata everywhere** — Every tile fetch and API call logs provider, timestamp, latency, and status. This builds an audit trail for accuracy and provider health over time.
+
+---
+
+## How a civic disaster dashboard is wired
+
+```mermaid
+flowchart LR
+  subgraph sources [Public sources]
+    GISTDA[GISTDA Gateway + GFlood]
+    NASA[GIBS / FIRMS / POWER / SMAP]
+    JAXA[GSMaP + Himawari]
+    CDSE[CDSE Sentinel-1/2 STAC]
+    WX[Open-Meteo + TMD]
+  end
+  subgraph app [This toolkit]
+    MOD[Modules + mock fallback]
+    OV[WMTS / XYZ overlays]
+  end
+  sources --> MOD --> UI[Operator UI]
+  sources --> OV --> UI
+```
+
+Verified endpoints, licences, and “do not scrape FloodDash” notes: [`docs/FREE-EO-SOURCES.md`](docs/FREE-EO-SOURCES.md).
+
+## Ethics for civic EO
+
+1. **Label measured vs modelled.** Sentinel-1 GRD and Sentinel-2 L2A are measurements. GSMaP rain, NASA POWER, Open-Meteo forecasts, SMAP L4, and GFlood prediction polygons are models or analyses. Historical recurrence is not a live flood.
+2. **Do not scrape private FloodDash or disaster-platform HTML.** Use the published Gateway and OGC services.
+3. **Attribute GISTDA** on Thai disaster layers (Open Data Common on the CKAN records; contact `wgs@gistda.or.th`).
+4. **Google Earth Engine:** noncommercial EECU quota is for research/education/nonprofit analysis. Operational government web apps and production tile CDNs need a [commercial licence](https://earthengine.google.com/commercial/). See [noncommercial terms](https://earthengine.google.com/noncommercial/).
+5. **No secrets in git** — environment *names* only in `.env.example`.
 
 ---
 
