@@ -597,12 +597,13 @@ export const nicheApis: SatelliteApi[] = [
     name: "GISTDA API Gateway (disaster)",
     agency: "GISTDA",
     country: "TH",
-    rootUrl: "https://api-gateway.gistda.or.th/v2",
+    rootUrl: "https://api-gateway.gistda.or.th/api/2.0/resources",
     endpoints: [
-      { path: "/api/2.0/resources/gi-service/v1.0/disasters/flood-extent-1day", description: "Flood extent, 1-day lookback (lat/lon)" },
-      { path: "/api/2.0/resources/gi-service/v1.0/disasters/flood-recurrence", description: "Flood recurrence 2011–2023 (lat/lon)" },
-      { path: "/api/2.0/resources/gi-service/v1.0/disasters/burnt-area-latest", description: "Burnt area latest, 365-day lookback (lat/lon)" },
-      { path: "/api/2.0/resources/gi-service/v1.0/disasters/drought-recurrence", description: "Drought recurrence 2018–2023 (lat/lon)" },
+      { path: "/features/flood/1day", description: "Flood features, 1-day window" },
+      { path: "/maps/flood/1day/wms", description: "Flood WMS (also wmts and tms/{z}/{x}/{y}; 3/7/30-day variants)" },
+      { path: "/features/viirs/1day", description: "VIIRS thermal features" },
+      { path: "/features/burn-scar", description: "Burn-scar features" },
+      { path: "/maps/smap/7days/wms", description: "GISTDA drought SMAP 7-day WMS (not NASA GIBS L4)" },
     ],
     protocol: "REST",
     auth: "api-key",
@@ -612,7 +613,7 @@ export const nicheApis: SatelliteApi[] = [
     notes:
       "Free key at the gateway portal. Catalogued on https://opendata.gistda.or.th . Attribute GISTDA. Do not scrape FloodDash. THEOS archive remains portal/commercial.",
     tier: "niche",
-    docsUrl: "https://opendata.gistda.or.th/en/dataset/disasters-03",
+    docsUrl: "https://disaster.gistda.or.th/services/open-api",
   },
   {
     id: "gistda-gflood",

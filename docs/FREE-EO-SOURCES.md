@@ -140,20 +140,40 @@ Respect OSM tile usage policy; do not hammer `tile.openstreetmap.org` from a hig
 
 **THEOS-1/2 archive imagery** is still largely portal / commercial — that older “no public API” claim applied to THEOS, not to disaster products.
 
-**What is public (2025–2026):**
+### Disaster Platform Open API (API key)
 
-| Product | Catalog (CKAN) | Gateway URL pattern | Notes |
-|---------|----------------|---------------------|-------|
-| Flood recurrence 2011–2023 | [disasters-01](https://opendata.gistda.or.th/en/dataset/disasters-01) | `https://api-gateway.gistda.or.th/api/2.0/resources/gi-service/v1.0/disasters/flood-recurrence?lat={lat}&lon={lon}&api_key=` | Historical frequency, **not live flood** |
-| Drought recurrence 2018–2023 | [disasters-02](https://opendata.gistda.or.th/en/dataset/disasters-02) | `.../disasters/drought-recurrence?lat=&lon=&api_key=` | Historical |
-| Flood extent (1-day lookback) | [disasters-03](https://opendata.gistda.or.th/en/dataset/disasters-03) | `.../disasters/flood-extent-1day?lat=&lon=&api_key=` | Satellite-derived mapped water |
-| Burnt area latest (365-day) | [disasters-04](https://opendata.gistda.or.th/en/dataset/disasters-04) | `.../disasters/burnt-area-latest?lat=&lon=&api_key=` | Burn-scar mapping |
-
+- Docs UI: **https://disaster.gistda.or.th/services/open-api**
 - Register a key: **https://api-gateway.gistda.or.th/v2**
-- Open Data portal: **https://opendata.gistda.or.th**
-- Licence on those records: Open Data Common. Contact: `wgs@gistda.or.th`
+- Base: **https://api-gateway.gistda.or.th/api/2.0/resources**
+- STAC UI: **https://disaster.gistda.or.th/services/stac** (retrospective catalog; flood items may be empty — not a live tile CDN)
+- Download portal: `https://disaster.gistda.or.th/services/download?type=flood` (also `fire`, `drought`, `other`). Includes Sentinel-1C/1D SAR flood scene rows for **retrospective** SAR, not a live TMS.
+- Air quality is a **separate** site: https://air.gistda.or.th
 
-**GFlood OGC / ArcGIS REST** (no gateway key for the public REST directory):
+Unauthenticated calls to the gateway return **HTTP 407 Authentication Required** (the paths exist). Do **not** document or call session internals under `/app-api/proxy/...`.
+
+| Kind | Paths (append to base) | Evidence |
+|------|------------------------|----------|
+| Flood features | `/features/flood/1day`, `/3days`, `/7days`, `/30days`, `/features/flood-freq`, `/features/water_hyacinth` | Mapped flood features / historical frequency |
+| Flood maps | `/maps/flood/{1day,3days,7days,30days}/{wms\|wmts\|tms/{z}/{x}/{y}}`, `/maps/flood-freq/{wms\|wmts\|tms/...}` | **Primary live civic tiles** (key required) |
+| Fire | `/features/viirs/{1day,3days,7days,30days}`, `/features/burn-freq`, `/features/burn-scar` + matching `/maps/viirs\|burn-freq\|burn-scar` | VIIRS hotspots / burn scar / frequency |
+| Drought maps | `/maps/dri\|ndwi\|smap/7days/{wms\|wmts\|tms/...}` | 7-day drought indices. GISTDA `smap` map ≠ NASA SMAP L4 GIBS |
+
+Example TMS: `https://api-gateway.gistda.or.th/api/2.0/resources/maps/flood/1day/tms/{z}/{x}/{y}` (send `api_key`).
+
+### GISTDA Open Data (CKAN) point APIs
+
+Same gateway host; published on [opendata.gistda.or.th](https://opendata.gistda.or.th). Licence: Open Data Common. Contact: `wgs@gistda.or.th`.
+
+| Product | Catalog | URL |
+|---------|---------|-----|
+| Flood recurrence 2011–2023 | [disasters-01](https://opendata.gistda.or.th/en/dataset/disasters-01) | `.../gi-service/v1.0/disasters/flood-recurrence?lat=&lon=&api_key=` |
+| Drought recurrence 2018–2023 | [disasters-02](https://opendata.gistda.or.th/en/dataset/disasters-02) | `.../disasters/drought-recurrence?lat=&lon=&api_key=` |
+| Flood extent (1-day) | [disasters-03](https://opendata.gistda.or.th/en/dataset/disasters-03) | `.../disasters/flood-extent-1day?lat=&lon=&api_key=` |
+| Burnt area latest | [disasters-04](https://opendata.gistda.or.th/en/dataset/disasters-04) | `.../disasters/burnt-area-latest?lat=&lon=&api_key=` |
+
+### GFlood ArcGIS REST (no gateway key for the directory)
+
+Public OGC/REST **in addition to** the Open API. Useful without a key for service discovery.
 
 | Service | URL |
 |---------|-----|
@@ -167,8 +187,8 @@ As of 2026-09-02 the WMS advertises `rain_30min.tif`, `FloodArea_Poly`, and `flo
 
 **Out of scope**
 
-- Scraping `https://disaster.gistda.or.th` or any FloodDash private UI
-- Reverse-engineering unpublished GIS endpoints
+- Scraping the Disaster Platform map UI or any private FloodDash
+- Calling undocumented `/app-api/proxy/...` session endpoints
 - Redistributing THEOS commercial scenes
 
 ---
@@ -188,8 +208,8 @@ Attribution: [Weather data by Open-Meteo.com](https://open-meteo.com/).
 
 | Module id | Live without a key? | Wraps |
 |-----------|---------------------|--------|
-| `gistda-gateway` | No (`GISTDA_API_KEY`) | Gateway disaster point APIs |
-| `gistda-gflood` | Yes | Public GFlood REST / WMS / WMTS metadata |
+| `gistda-gateway` | No (`GISTDA_API_KEY`) | Open API `/features/flood|viirs|burn-*` |
+| `gistda-gflood` | Yes (ArcGIS directory) | Open API map templates + public GFlood WMS/WMTS |
 | `jaxa-gsmap` | Yes (portal + NICT probe) | GSMaP + Himawari freshness |
 | `copernicus-cdse` | Yes (STAC search) | CDSE Sentinel-1/2 catalog |
 | `open-meteo-forecast` | Yes | Open-Meteo forecast |

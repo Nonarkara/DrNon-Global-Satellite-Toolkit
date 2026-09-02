@@ -9,6 +9,68 @@ const GFLOOD_WMTS =
   "https://gistdaportal.gistda.or.th/data/rest/services/GFlood/GFlood_Inno_WMTS3857/MapServer";
 const GFLOOD_WMS_OGC =
   "https://gistdaportal.gistda.or.th/data/services/GFlood/GFlood_Inno_WMS/MapServer/WMSServer";
+const OPEN_API_BASE = "https://api-gateway.gistda.or.th/api/2.0/resources";
+const OPEN_API_DOCS = "https://disaster.gistda.or.th/services/open-api";
+
+/** Disaster Platform Open API map templates (API key required at request time). */
+const OPEN_API_MAPS: GfloodLayerRow[] = [
+  {
+    service: "Open API",
+    layer: "flood/1day",
+    kind: "WMS",
+    endpoint: `${OPEN_API_BASE}/maps/flood/1day/wms`,
+    notes: "Live flood WMS. Requires GISTDA_API_KEY. Docs: disaster.gistda.or.th/services/open-api",
+    attribution: GISTDA_ATTRIBUTION,
+  },
+  {
+    service: "Open API",
+    layer: "flood/1day",
+    kind: "WMTS",
+    endpoint: `${OPEN_API_BASE}/maps/flood/1day/wmts`,
+    notes: "Live flood WMTS. Requires GISTDA_API_KEY.",
+    attribution: GISTDA_ATTRIBUTION,
+  },
+  {
+    service: "Open API",
+    layer: "flood/1day",
+    kind: "TMS",
+    endpoint: `${OPEN_API_BASE}/maps/flood/1day/tms/{z}/{x}/{y}`,
+    notes: "Live flood TMS tiles. Requires GISTDA_API_KEY. Same pattern for 3days, 7days, 30days.",
+    attribution: GISTDA_ATTRIBUTION,
+  },
+  {
+    service: "Open API",
+    layer: "flood-freq",
+    kind: "WMS / WMTS / TMS",
+    endpoint: `${OPEN_API_BASE}/maps/flood-freq/wms`,
+    notes: "Flood-frequency map (historical). Also /wmts and /tms/{z}/{x}/{y}.",
+    attribution: GISTDA_ATTRIBUTION,
+  },
+  {
+    service: "Open API",
+    layer: "viirs/1day",
+    kind: "features + maps",
+    endpoint: `${OPEN_API_BASE}/maps/viirs/1day/wms`,
+    notes: "VIIRS thermal maps. Features at /features/viirs/{1day,3days,7days,30days}.",
+    attribution: GISTDA_ATTRIBUTION,
+  },
+  {
+    service: "Open API",
+    layer: "burn-scar / burn-freq",
+    kind: "WMS / WMTS / TMS",
+    endpoint: `${OPEN_API_BASE}/maps/burn-scar/wms`,
+    notes: "Burn-scar and burn-frequency maps. Matching /features/burn-scar and /features/burn-freq.",
+    attribution: GISTDA_ATTRIBUTION,
+  },
+  {
+    service: "Open API",
+    layer: "dri / ndwi / smap 7days",
+    kind: "WMS / WMTS / TMS",
+    endpoint: `${OPEN_API_BASE}/maps/smap/7days/wms`,
+    notes: "Drought 7-day maps: /maps/dri|ndwi|smap/7days/{wms|wmts|tms/...}. SMAP here is GISTDA's drought map, not NASA GIBS L4.",
+    attribution: GISTDA_ATTRIBUTION,
+  },
+];
 
 interface GfloodLayerRow {
   service: string;
@@ -40,7 +102,7 @@ export const gistdaGflood: ModuleDefinition<GfloodLayerRow[]> = {
   label: "GISTDA GFlood OGC Tiles",
   category: "earth-observation",
   description:
-    "Public GISTDA GFlood ArcGIS REST / WMS / WMTS services — rain, flood polygons, and a 2011 flood tile cache. Attribute GISTDA. Not a scrape of FloodDash.",
+    "GISTDA flood tiles: Disaster Platform Open API (WMS/WMTS/TMS, key required) plus public GFlood ArcGIS OGC. Attribute GISTDA. Do not scrape FloodDash or /app-api/proxy internals.",
   pollInterval: 3600,
   uiType: "table",
   tableColumns: [
@@ -65,7 +127,17 @@ export const gistdaGflood: ModuleDefinition<GfloodLayerRow[]> = {
     const wms = (await wmsRes.json()) as ArcGisMapServer;
     const wmts = (await wmtsRes.json()) as ArcGisMapServer;
 
-    const rows: GfloodLayerRow[] = [];
+    const rows: GfloodLayerRow[] = [
+      ...OPEN_API_MAPS,
+      {
+        service: "Open API docs",
+        layer: "(manual)",
+        kind: "HTML",
+        endpoint: OPEN_API_DOCS,
+        notes: "Official Open API Swagger/manual UI. STAC UI: https://disaster.gistda.or.th/services/stac (retrospective; not a live tile CDN). Sentinel-1 flood scenes via download portal.",
+        attribution: GISTDA_ATTRIBUTION,
+      },
+    ];
 
     for (const svc of folder.services ?? []) {
       rows.push({
