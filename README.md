@@ -1,5 +1,9 @@
 # DrNon Global Satellite Toolkit
 
+![Hero banner: manga-style field operator with a holographic tablet, Earth, satellites, and flood / fire / drought scenes. HUD artwork is illustration only.](docs/hero-banner.png)
+
+*Illustration only — the holographic HUD is conceptual artwork, not a screenshot of this software. This toolkit is **not an official GISTDA product**.*
+
 **See Everything. Build Anything. Deploy Anywhere.**
 
 A production-grade, open-source framework for building satellite-powered dashboards at any scale — from a single city to the entire planet. Clone it, point it at a geography, and you have a working situational awareness system in minutes.
@@ -12,13 +16,78 @@ A production-grade, open-source framework for building satellite-powered dashboa
 
 ---
 
-## What This Is
+## What this is
 
 This is not a satellite viewer. It's a **blueprint for building real-time global awareness systems**.
 
-42,000+ lines of TypeScript. 38 pluggable data-source modules. 20+ satellite APIs from 80+ space agencies surveyed worldwide. A rendering pipeline that layers fire detection over vegetation indices over night-time lights over ocean bathymetry — on any base map, with any combination, and it always renders even when APIs go down.
+38 pluggable data-source modules. 20+ satellite APIs from 80+ space agencies surveyed worldwide. A rendering pipeline that layers fire detection over vegetation indices over night-time lights over ocean bathymetry — on any base map, with any combination, and it always renders even when APIs go down.
 
-It started as a hobby — "how many satellite feeds can I stack onto one map?" — and turned into the toolkit that powers production monitoring dashboards for smart city programs.
+It started as a hobby — "how many satellite feeds can I stack onto one map?" — and turned into a template that civic and smart-city teams can fork. Thai disaster layers use **GISTDA’s published Disaster Platform Open API** (flood / fire / drought features and WMS/WMTS/TMS). Verified URLs live in [`docs/FREE-EO-SOURCES.md`](docs/FREE-EO-SOURCES.md).
+
+This repository is an independent open-source toolkit. **It is not an official GISTDA product**, not an official warning service, and not a substitute for TMD or DDPM.
+
+## Philosophy invitation
+
+Most of the world’s Earth-observation data is already paid for by the public and then locked behind portals, jargon, and “you had to be there” tribal knowledge. The invitation is simple: **fork this, pick a geography, and put measured pixels and honest models in front of people who have to decide**.
+
+You do not need to scrape a private dashboard to be useful. You do not need to pretend a rainfall algorithm is a rain gauge. You do not need Google Earth Engine as a free municipal tile CDN. You need attribution, fallbacks, and the courage to label uncertainty.
+
+If that is the kind of civic instrument you want to build — a human in the loop, satellites overhead, no blank screen — this repo is yours to clone. Add a module. Remove one. Keep the ethics.
+
+## Ethical use
+
+1. **Measured vs modelled.** Optical/SAR pixels and rain gauges are observations. GSMaP rain rates, NASA POWER, Open-Meteo forecasts, SMAP L4, and flood-prediction polygons are models or analyses. Historical flood-frequency is not a live inundation. Label the difference in the UI.
+2. **Attribute GISTDA** on every Thai disaster layer: *Geo-Informatics and Space Technology Development Agency (GISTDA)*. Open Data records use the Open Data Common licence (`wgs@gistda.or.th`).
+3. **Google Earth Engine noncommercial ≠ production CDN.** Free EECU quota is for research, education, and nonprofit analysis. Operational government web apps and production tile serving need a [commercial / government-operational licence](https://earthengine.google.com/commercial/). See [noncommercial terms](https://earthengine.google.com/noncommercial/). This toolkit does **not** ship an Earth Engine tile module.
+4. **Not an official GISTDA product.** Use the published Open API only (`https://api-gateway.gistda.or.th/api/2.0/resources`). Do **not** scrape FloodDash, Disaster Platform HTML, or undocumented `/app-api/proxy/...` session internals.
+5. **No secrets in git.** Environment *names* only. Register your own `GISTDA_API_KEY` at https://api-gateway.gistda.or.th/v2 — never commit a real key.
+
+## How the system works
+
+```mermaid
+flowchart TB
+  subgraph sources [Public sources — Open API and documented tiles]
+    GISTDA[GISTDA Open API flood / fire / drought]
+    NASA[GIBS / FIRMS / POWER / SMAP]
+    JAXA[GSMaP + Himawari]
+    CDSE[CDSE Sentinel-1/2 STAC]
+    WX[Open-Meteo + TMD]
+  end
+  subgraph app [This toolkit]
+    MOD[Modules + mock fallback]
+    OV[WMTS / XYZ overlays]
+  end
+  sources --> MOD --> UI[Operator UI]
+  sources --> OV --> UI
+```
+
+Layers stack from a base map up through satellite imagery, analytic overlays, a distance grid, then module panels. Every module is one file with `fetchData()` plus `mockData` of the same schema. No key? Mock loads. API down? Mock loads. **There is no failure state that produces a blank screen.**
+
+```
+Module panels → labels → distance grid → analytic overlays → satellite imagery → basemap → gradient fallback
+```
+
+## How to run / fork
+
+Honest path — this repo, no invented endpoints:
+
+```bash
+git clone https://github.com/Nonarkara/DrNon-Global-Satellite-Toolkit.git
+cd DrNon-Global-Satellite-Toolkit
+npm install
+npm run dev
+# Open http://localhost:3000
+```
+
+No API keys are required to start. Every module ships mock data. For live GISTDA GeoJSON and tiles, copy [`.env.example`](.env.example) to `.env.local` and set **only the env name** `GISTDA_API_KEY` (register your own key; never commit it). Optional names for other sources (`FIRMS_KEY`, and so on) are listed in `.env.example`.
+
+Then enable modules in the UI: NASA FIRMS, GISTDA Gateway, GISTDA GFlood, JAXA GSMaP, Copernicus CDSE, Open-Meteo Forecast, ReliefWeb. Fork, change the map center, add a file under `src/modules/`, register it in `src/modules/registry.ts`.
+
+## License
+
+MIT — Copyright (c) 2026 Dr Non Arkaraprasertkul. See [LICENSE](LICENSE).
+
+---
 
 ## What You Can Build With This
 
@@ -333,7 +402,7 @@ Fill in 5 things:
 1. **`id`** — unique string
 2. **`label`** — human-readable name
 3. **`category`** — which drawer it appears in
-4. **`fetchData()`** — the API call (or scrape, or computation)
+4. **`fetchData()`** — the published API call (or computation). Do not scrape `/app-api/proxy` or private dashboards.
 5. **`mockData`** — realistic fallback data (same schema as live)
 
 Add one import line to `src/modules/registry.ts`. Done. It appears in the module selector, gets a dynamic API route, and the React hook can consume it.
@@ -365,17 +434,7 @@ Supports 5 storage backends with automatic resolution:
 | **Google Sheets** | Non-sensitive data, easy sharing | Free with Google account |
 | **Local Cache** | Offline fallback | Always available |
 
-## Quick Start
-
-```bash
-git clone https://github.com/Nonarkara/DrNon-Global-Satellite-Toolkit.git
-cd DrNon-Global-Satellite-Toolkit
-npm install
-npm run dev
-# Open http://localhost:3000
-```
-
-No API keys required to start — every module has mock data that loads automatically. Add keys to `.env.local` as needed for live data.
+Clone and run steps are in [How to run / fork](#how-to-run--fork).
 
 ### Use as a Library
 
@@ -457,36 +516,7 @@ SUPABASE_ANON_KEY=
 
 6. **Metadata everywhere** — Every tile fetch and API call logs provider, timestamp, latency, and status. This builds an audit trail for accuracy and provider health over time.
 
----
-
-## How a civic disaster dashboard is wired
-
-```mermaid
-flowchart LR
-  subgraph sources [Public sources]
-    GISTDA[GISTDA Gateway + GFlood]
-    NASA[GIBS / FIRMS / POWER / SMAP]
-    JAXA[GSMaP + Himawari]
-    CDSE[CDSE Sentinel-1/2 STAC]
-    WX[Open-Meteo + TMD]
-  end
-  subgraph app [This toolkit]
-    MOD[Modules + mock fallback]
-    OV[WMTS / XYZ overlays]
-  end
-  sources --> MOD --> UI[Operator UI]
-  sources --> OV --> UI
-```
-
-Verified endpoints, licences, and “do not scrape FloodDash” notes: [`docs/FREE-EO-SOURCES.md`](docs/FREE-EO-SOURCES.md).
-
-## Ethics for civic EO
-
-1. **Label measured vs modelled.** Sentinel-1 GRD and Sentinel-2 L2A are measurements. GSMaP rain, NASA POWER, Open-Meteo forecasts, SMAP L4, and GFlood prediction polygons are models or analyses. Historical recurrence is not a live flood.
-2. **Do not scrape private FloodDash or disaster-platform HTML.** Use the published Gateway and OGC services.
-3. **Attribute GISTDA** on Thai disaster layers (Open Data Common on the CKAN records; contact `wgs@gistda.or.th`).
-4. **Google Earth Engine:** noncommercial EECU quota is for research/education/nonprofit analysis. Operational government web apps and production tile CDNs need a [commercial licence](https://earthengine.google.com/commercial/). See [noncommercial terms](https://earthengine.google.com/noncommercial/).
-5. **No secrets in git** — environment *names* only in `.env.example`.
+Verified endpoints and licences: [`docs/FREE-EO-SOURCES.md`](docs/FREE-EO-SOURCES.md). Ethics: [Ethical use](#ethical-use).
 
 ---
 
