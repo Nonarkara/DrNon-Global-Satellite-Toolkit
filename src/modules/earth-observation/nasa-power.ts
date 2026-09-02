@@ -63,10 +63,14 @@ export const nasaPower: ModuleDefinition<PowerRow[]> = {
       const fill = json.header?.fill_value ?? -999;
       const t2m = json.properties?.parameter?.T2M ?? {};
       const pr = json.properties?.parameter?.PRECTOTCORR ?? {};
-      const dates = Object.keys(t2m).sort().reverse();
+      const dates = Object.keys(t2m)
+        .filter((date) => t2m[date] !== fill && pr[date] !== fill)
+        .sort()
+        .reverse();
       const sources = (json.header?.sources ?? ["GEOS"]).join(", ");
 
-      for (const date of dates.slice(0, 4)) {
+      const picked = dates.length > 0 ? dates.slice(0, 3) : Object.keys(t2m).sort().reverse().slice(0, 3);
+      for (const date of picked) {
         const t = t2m[date];
         const p = pr[date];
         rows.push({

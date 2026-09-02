@@ -16,7 +16,7 @@ A production-grade, open-source framework for building satellite-powered dashboa
 
 This is not a satellite viewer. It's a **blueprint for building real-time global awareness systems**.
 
-42,000+ lines of TypeScript. 37 pluggable data-source modules. 20+ satellite APIs from 80+ space agencies surveyed worldwide. A rendering pipeline that layers fire detection over vegetation indices over night-time lights over ocean bathymetry — on any base map, with any combination, and it always renders even when APIs go down.
+42,000+ lines of TypeScript. 38 pluggable data-source modules. 20+ satellite APIs from 80+ space agencies surveyed worldwide. A rendering pipeline that layers fire detection over vegetation indices over night-time lights over ocean bathymetry — on any base map, with any combination, and it always renders even when APIs go down.
 
 It started as a hobby — "how many satellite feeds can I stack onto one map?" — and turned into the toolkit that powers production monitoring dashboards for smart city programs.
 
@@ -102,7 +102,7 @@ It started as a hobby — "how many satellite feeds can I stack onto one map?" �
 └─────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────┐
-│                     MODULE SYSTEM (37 data sources)                 │
+│                     MODULE SYSTEM (38 data sources)                 │
 ├─────────────────────────────────────────────────────────────────────┤
 │  Earth Observation    │  NASA, Sentinel/CDSE, ISRO, JAXA, GISTDA   │
 │  Orbital & Air        │  OpenSky, CelesTrak, Space-Track, Flights  │
@@ -132,7 +132,7 @@ Every tile fetch records metadata — provider, timestamp, latency, imagery date
 
 ---
 
-## 37 Pluggable Data-Source Modules
+## 38 Pluggable Data-Source Modules
 
 The module system is the core innovation. Each data source is a **self-contained file** — one file per API, with fetch logic, realistic mock data, and UI rendering hints. Add or remove modules by editing one line in the registry.
 
