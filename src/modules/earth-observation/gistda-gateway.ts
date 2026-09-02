@@ -8,6 +8,7 @@ import {
 } from "../lib/gistda-open-api";
 
 interface GistdaGatewayRow {
+  priority: number;
   product: string;
   endpoint: string;
   summary: string;
@@ -44,10 +45,11 @@ export const gistdaGateway: ModuleDefinition<GistdaGatewayRow[]> = {
   label: "GISTDA Disaster Gateway",
   category: "earth-observation",
   description:
-    "GISTDA Disaster Platform Open API feature feeds: /features/flood/{1day,3days,7days,30days}, flood-freq, water_hyacinth, /features/viirs/…, burn-scar, burn-freq. Key optional for live JSON. Do not call /app-api/proxy.",
+    "Priority 2–3 Open API feature feeds: /features/flood/{1day,3days,7days,30days} + flood-freq, then VIIRS / burn-scar / burn-freq. Catalog works without a key; GeoJSON needs GISTDA_API_KEY. Open API gateway only — not /app-api/proxy.",
   pollInterval: 1800,
   uiType: "table",
   tableColumns: [
+    { key: "priority", label: "P" },
     { key: "product", label: "Product" },
     { key: "endpoint", label: "Endpoint" },
     { key: "summary", label: "Summary" },
@@ -64,6 +66,7 @@ export const gistdaGateway: ModuleDefinition<GistdaGatewayRow[]> = {
       const probe = await probeGistdaOpenApi("/features/flood/1day");
       for (const product of GISTDA_FEATURE_PATHS) {
         rows.push({
+          priority: product.priority,
           product: product.label,
           endpoint: gistdaOpenApiUrl(product.path),
           summary: `Probe /features/flood/1day → HTTP ${probe.status} — set GISTDA_API_KEY for live GeoJSON. ${probe.body}`,
@@ -83,6 +86,7 @@ export const gistdaGateway: ModuleDefinition<GistdaGatewayRow[]> = {
         const payload: unknown = await res.json().catch(() => ({ status: res.status }));
         if (!res.ok) throw new Error(`${product.path}: HTTP ${res.status}`);
         return {
+          priority: product.priority,
           product: product.label,
           endpoint: gistdaOpenApiUrl(product.path),
           summary: summarizePayload(payload),
@@ -109,6 +113,7 @@ export const gistdaGateway: ModuleDefinition<GistdaGatewayRow[]> = {
   },
 
   mockData: GISTDA_FEATURE_PATHS.slice(0, 3).map((product) => ({
+    priority: product.priority,
     product: product.label,
     endpoint: gistdaOpenApiUrl(product.path),
     summary: "Mock — live Open API needs GISTDA_API_KEY (HTTP 407 without it)",

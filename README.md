@@ -261,7 +261,7 @@ Full details with endpoints in [`src/registry/global-satellite-apis.ts`](src/reg
 
 ## Satellite Imagery Overlays
 
-10 raster overlays from 6 providers, plus SMAP soil moisture and GISTDA GFlood 2011, all consumable via standard WMTS/XYZ tiles:
+10 raster overlays from 6 providers, plus SMAP soil moisture, **GISTDA Open API live flood/fire/drought TMS**, and the historical GFlood 2011 cache:
 
 | Overlay | Source | What It Reveals |
 |---------|--------|-----------------|
@@ -276,7 +276,11 @@ Full details with endpoints in [`src/registry/global-satellite-apis.ts`](src/reg
 | Surface Water | JRC/Google | Every lake, river, and reservoir mapped and tracked over time |
 | Ocean Bathymetry | EMODnet/GEBCO | Seafloor depth for maritime and coastal analysis |
 | SMAP Surface Moisture | NASA GIBS / SMAP L4 | Modelled land-surface soil moisture (not an in-situ probe) |
-| GISTDA GFlood 2011 | GISTDA | Historical 2011 flood footprint tiles — not live inundation |
+| GISTDA Flood 1/3/7/30-day | GISTDA Open API | **Priority 1** live flood TMS (`/maps/flood/{window}/tms/{z}/{x}/{y}`) — needs `GISTDA_API_KEY` |
+| GISTDA Flood frequency | GISTDA Open API | Historical flood-frequency TMS — companion to `/features/flood-freq` |
+| GISTDA VIIRS / burn | GISTDA Open API | **Priority 3** VIIRS 1-day + burn-scar + burn-freq TMS |
+| GISTDA Drought DRI/NDWI/SMAP | GISTDA Open API | **Priority 4** 7-day drought TMS. GISTDA `smap` ≠ NASA SMAP L4 |
+| GISTDA GFlood 2011 | GISTDA ArcGIS | Historical 2011 flood footprint — not the live Open API path |
 
 ---
 

@@ -149,7 +149,19 @@ Respect OSM tile usage policy; do not hammer `tile.openstreetmap.org` from a hig
 - Download portal: `https://disaster.gistda.or.th/services/download?type=flood` (also `fire`, `drought`, `other`). Includes Sentinel-1C/1D SAR flood scene rows for **retrospective** SAR, not a live TMS.
 - Air quality is a **separate** site: https://air.gistda.or.th
 
-Unauthenticated calls to the gateway return **HTTP 407 Authentication Required** (the paths exist). Node/undici throws on 407, so the modules probe with a placeholder `api_key` and expect **401 INVALID_API_KEY** until a real `GISTDA_API_KEY` is set. Do **not** document or call session internals under `/app-api/proxy/...`.
+Unauthenticated calls to the gateway return **HTTP 407 Authentication Required** (the paths exist). Node/undici throws on 407, so the modules probe with a placeholder `api_key` and expect **401 INVALID_API_KEY** until a real `GISTDA_API_KEY` is set.
+
+**Do not treat `/app-api/proxy/...` as a public API.** Those are authenticated Disaster Platform app internals (session cookies). Civic dashboards must use the Open API gateway only. Knowledge nav has **no** separate developer-docs URL beyond the Swagger manual above.
+
+### Civic dashboard priority (this toolkit)
+
+| P | Use | Live path | Notes |
+|---|-----|-----------|--------|
+| **1** | Flood tiles | `/maps/flood/{1day,3days,7days,30days}/{wms\|wmts\|tms/{z}/{x}/{y}}` | Primary NRT civic overlay. TMS IDs: `gistdaFlood1day` … `gistdaFlood30days` |
+| **2** | Flood features | `/features/flood/{1day,3days,7days,30days}`, `/features/flood-freq` | Mapped water + historical frequency. Overlay companion: `gistdaFloodFreq` |
+| **3** | Fire | `/features/viirs/{1day,3days,7days,30days}`, `/features/burn-scar`, `/features/burn-freq` + matching `/maps/viirs\|burn-scar\|burn-freq` | Overlays: `gistdaViirs1day`, `gistdaBurnScar`, `gistdaBurnFreq` |
+| **4** | Drought | `/maps/dri\|ndwi\|smap/7days/{wms\|wmts\|tms/...}` | Overlays: `gistdaDri7days`, `gistdaNdwi7days`, `gistdaSmap7days`. GISTDA `smap` ≠ NASA SMAP L4 |
+| **5** | Retrospective only | STAC UI + download portal | **Not** a live tile CDN. Flood STAC was empty at inventory time. Download `?type=flood` has Sentinel-1C/1D SAR rows (IDs like `S1D_YYYYMMDD_HHMM`) for historical SAR, not TMS |
 
 | Kind | Paths (append to base) | Evidence |
 |------|------------------------|----------|
@@ -189,7 +201,8 @@ As of 2026-09-02 the WMS advertises `rain_30min.tif`, `FloodArea_Poly`, and `flo
 **Out of scope**
 
 - Scraping the Disaster Platform map UI or any private FloodDash
-- Calling undocumented `/app-api/proxy/...` session endpoints
+- Documenting or calling `/app-api/proxy/...` session endpoints as if they were public Open API paths
+- Treating STAC or Sentinel-1C/1D download rows as a live flood tile CDN
 - Redistributing THEOS commercial scenes
 
 ---
@@ -209,8 +222,8 @@ Attribution: [Weather data by Open-Meteo.com](https://open-meteo.com/).
 
 | Module id | Live without a key? | Wraps |
 |-----------|---------------------|--------|
-| `gistda-gateway` | Yes (path catalog; GeoJSON needs `GISTDA_API_KEY`) | Exact `/features/flood|flood-freq|water_hyacinth|viirs|burn-*` inventory |
-| `gistda-gflood` | Yes (map catalog) | Exact `/maps/flood|flood-freq|viirs|burn-*|dri|ndwi|smap` WMS/WMTS/TMS |
+| `gistda-gateway` | Yes (path catalog; GeoJSON needs `GISTDA_API_KEY`) | Priority 2–3 `/features/flood/*`, flood-freq, VIIRS, burn-* |
+| `gistda-gflood` | Yes (map catalog) | Priority 1 `/maps/flood/{1,3,7,30}day` + fire/drought maps; P5 STAC/S1 notes |
 | `jaxa-gsmap` | Yes (portal + NICT probe) | GSMaP + Himawari freshness |
 | `copernicus-cdse` | Yes (STAC search) | CDSE Sentinel-1/2 catalog |
 | `open-meteo-forecast` | Yes | Open-Meteo forecast |

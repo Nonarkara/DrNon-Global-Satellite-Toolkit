@@ -11,7 +11,7 @@
  *   - EOX/ESA Sentinel-2 Cloudless
  *   - JRC/Google Global Surface Water
  *   - EMODnet Bathymetry
- *   - GISTDA GFlood WMTS (2011 flood footprint)
+ *   - GISTDA Open API TMS (live flood / VIIRS / burn / drought) + 2011 GFlood cache
  */
 
 import type {
@@ -19,6 +19,10 @@ import type {
   MapOverlayCatalogResponse,
   MapOverlayKind,
 } from "../types/satellite";
+import {
+  GISTDA_CIVIC_TMS_OVERLAYS,
+  gistdaOpenApiUrl,
+} from "../modules/lib/gistda-open-api";
 
 /**
  * NASA GIBS only serves imagery up to the current real-world date.
@@ -228,12 +232,27 @@ export function buildMapOverlayCatalog(
       tileTemplate:
         `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/SMAP_L4_Analyzed_Surface_Soil_Moisture/default/${focusDate}/GoogleMapsCompatible_Level6/{z}/{y}/{x}.png`,
     }),
+    ...GISTDA_CIVIC_TMS_OVERLAYS.map((layer) =>
+      rasterOverlay({
+        id: layer.id,
+        label: layer.label,
+        shortLabel: layer.shortLabel,
+        description: layer.description,
+        source: "GISTDA Open API",
+        family: layer.family === "drought" ? "terrain" : "operational",
+        role: "analytic",
+        defaultOpacity: 0.55,
+        enabledByDefault: false,
+        maxZoom: 14,
+        tileTemplate: gistdaOpenApiUrl(layer.path),
+      }),
+    ),
     rasterOverlay({
       id: "gflood2011",
       label: "GISTDA GFlood 2011",
       shortLabel: "GF11",
       description:
-        "GISTDA GFlood WMTS cache of the 2011 flood footprint (Flood_Y2011). Historical extent, not live inundation. Attribute GISTDA.",
+        "Historical ArcGIS WMTS cache of the 2011 flood footprint (Flood_Y2011) — not the live Open API flood TMS. Prefer gistdaFlood1day for civic NRT. Attribute GISTDA.",
       source: "GISTDA GFlood",
       family: "operational",
       role: "analytic",

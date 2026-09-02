@@ -84,8 +84,8 @@ Enable relevant modules in `src/modules/registry.ts` by keeping/removing entries
 - `jaxa-tellus` — JAXA Earth observation
 - `jaxa-gsmap` — JAXA GSMaP rainfall + Himawari browse freshness
 - `gk2a-korea` — GK2A geostationary weather
-- `gistda-gateway` — Open API `/features/flood/{1day,3days,7days,30days}`, flood-freq, water_hyacinth, `/features/viirs/…`, burn-scar, burn-freq. Catalog works without a key; GeoJSON needs GISTDA_API_KEY
-- `gistda-gflood` — Open API `/maps/flood|flood-freq|viirs|burn-*|dri|ndwi|smap` WMS/WMTS/TMS templates
+- `gistda-gateway` — Priority 2–3 Open API `/features/flood/{1day,3days,7days,30days}` + flood-freq, then VIIRS / burn-scar / burn-freq. Catalog works without a key; GeoJSON needs GISTDA_API_KEY. Not `/app-api/proxy`.
+- `gistda-gflood` — Priority 1 Open API flood WMS/WMTS/TMS (1/3/7/30-day), then fire/drought maps. STAC + Sentinel-1C/1D download are priority 5 retrospective, not a live tile CDN.
 
 **Orbital & Air Traffic**:
 - `opensky-network` — Real-time flight tracking (wraps /api/flights)
