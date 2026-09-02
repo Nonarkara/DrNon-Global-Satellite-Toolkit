@@ -99,9 +99,43 @@ export const optionalProviders: SatelliteProviderDescriptor[] = [
     label: "Google Earth Engine",
     category: "Analytics",
     description:
-      "Planetary analysis platform for scripted Sentinel and Landsat change detection.",
+      "Planetary analysis platform. Free noncommercial EECU quota is not a production government tile CDN — operational civic apps need a commercial licence.",
     surfaces: ["Time-series analysis", "NDVI computation", "SAR processing"],
-    endpoints: ["https://earthengine.googleapis.com/"],
+    endpoints: [
+      "https://earthengine.googleapis.com/",
+      "https://earthengine.google.com/noncommercial/",
+      "https://earthengine.google.com/commercial/",
+    ],
+    optional: true,
+  },
+  {
+    id: "gistda-gflood",
+    label: "GISTDA Disaster Platform maps",
+    category: "Disaster",
+    description:
+      "Open API WMS/WMTS/TMS for flood, fire, and drought. Attribute GISTDA. Do not scrape FloodDash or /app-api/proxy.",
+    surfaces: ["Flood 1/3/7/30-day tiles", "VIIRS / burn-scar tiles", "Drought DRI/NDWI/SMAP 7-day"],
+    endpoints: [
+      "https://api-gateway.gistda.or.th/api/2.0/resources/maps/flood/1day/wms",
+      "https://api-gateway.gistda.or.th/api/2.0/resources/maps/flood/1day/tms/{z}/{x}/{y}",
+      "https://api-gateway.gistda.or.th/api/2.0/resources/maps/viirs/1day/wms",
+      "https://api-gateway.gistda.or.th/api/2.0/resources/maps/dri/7days/wms",
+      "https://disaster.gistda.or.th/services/open-api",
+      "https://disaster.gistda.or.th/services/stac",
+    ],
+    optional: true,
+  },
+  {
+    id: "copernicus-cdse",
+    label: "Copernicus Data Space STAC",
+    category: "Catalog",
+    description:
+      "Native CDSE STAC for Sentinel-1 GRD and Sentinel-2 L2A. Catalog search is public; downloads need a CDSE account.",
+    surfaces: ["Sentinel-2 L2A search", "Sentinel-1 GRD search"],
+    endpoints: [
+      "https://stac.dataspace.copernicus.eu/v1",
+      "https://stac.dataspace.copernicus.eu/v1/search",
+    ],
     optional: true,
   },
 ];
