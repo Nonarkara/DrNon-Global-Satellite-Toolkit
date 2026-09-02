@@ -149,7 +149,7 @@ Respect OSM tile usage policy; do not hammer `tile.openstreetmap.org` from a hig
 - Download portal: `https://disaster.gistda.or.th/services/download?type=flood` (also `fire`, `drought`, `other`). Includes Sentinel-1C/1D SAR flood scene rows for **retrospective** SAR, not a live TMS.
 - Air quality is a **separate** site: https://air.gistda.or.th
 
-Unauthenticated calls to the gateway return **HTTP 407 Authentication Required** (the paths exist). Do **not** document or call session internals under `/app-api/proxy/...`.
+Unauthenticated calls to the gateway return **HTTP 407 Authentication Required** (the paths exist). Node/undici throws on 407, so the modules probe with a placeholder `api_key` and expect **401 INVALID_API_KEY** until a real `GISTDA_API_KEY` is set. Do **not** document or call session internals under `/app-api/proxy/...`.
 
 | Kind | Paths (append to base) | Evidence |
 |------|------------------------|----------|

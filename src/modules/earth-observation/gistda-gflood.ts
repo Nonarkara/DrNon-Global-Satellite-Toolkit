@@ -5,6 +5,7 @@ import {
   GISTDA_OPEN_API_DOCS,
   GISTDA_PORTAL_LINKS,
   gistdaOpenApiUrl,
+  probeGistdaOpenApi,
 } from "../lib/gistda-open-api";
 
 interface GfloodLayerRow {
@@ -32,9 +33,7 @@ export const gistdaGflood: ModuleDefinition<GfloodLayerRow[]> = {
   ],
 
   async fetchData() {
-    const probe = await fetch(gistdaOpenApiUrl("/maps/flood/1day/wms"), {
-      signal: AbortSignal.timeout(10000),
-    });
+    const probe = await probeGistdaOpenApi("/maps/flood/1day/wms");
 
     const rows: GfloodLayerRow[] = [
       ...GISTDA_MAP_PATHS.map((item) => ({

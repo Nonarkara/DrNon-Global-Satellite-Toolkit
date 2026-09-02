@@ -4,6 +4,7 @@ import {
   GISTDA_FEATURE_PATHS,
   GISTDA_OPEN_API_DOCS,
   gistdaOpenApiUrl,
+  probeGistdaOpenApi,
 } from "../lib/gistda-open-api";
 
 interface GistdaGatewayRow {
@@ -58,16 +59,14 @@ export const gistdaGateway: ModuleDefinition<GistdaGatewayRow[]> = {
     const rows: GistdaGatewayRow[] = [];
 
     if (!key) {
-      // Catalog the exact inventory paths. One probe proves the gateway is up (407 = auth required).
-      const probe = await fetch(gistdaOpenApiUrl("/features/flood/1day"), {
-        signal: AbortSignal.timeout(10000),
-      });
-      const probeBody = await probe.text();
+      // Catalog the exact inventory. Probe with a placeholder key — bare 407
+      // makes Node/undici throw ("proxy authentication required").
+      const probe = await probeGistdaOpenApi("/features/flood/1day");
       for (const product of GISTDA_FEATURE_PATHS) {
         rows.push({
           product: product.label,
           endpoint: gistdaOpenApiUrl(product.path),
-          summary: `HTTP ${probe.status} on /features/flood/1day — set GISTDA_API_KEY for live GeoJSON. ${probeBody.slice(0, 80)}`,
+          summary: `Probe /features/flood/1day → HTTP ${probe.status} — set GISTDA_API_KEY for live GeoJSON. ${probe.body}`,
           evidence: product.evidence,
           docs: GISTDA_OPEN_API_DOCS,
           attribution: GISTDA_ATTRIBUTION,

@@ -191,3 +191,25 @@ export function gistdaOpenApiUrl(path: string): string {
   if (path.startsWith("http")) return path;
   return `${GISTDA_OPEN_API_BASE}${path}`;
 }
+
+/**
+ * Unauthenticated Open API calls return HTTP 407. Node/undici treats 407 as
+ * proxy-auth failure and throws, so probes must send a placeholder `api_key`
+ * (invalid key → 401 JSON) or a real `GISTDA_API_KEY`.
+ */
+export async function probeGistdaOpenApi(
+  path: string,
+): Promise<{ status: number; body: string }> {
+  const url = new URL(gistdaOpenApiUrl(path));
+  url.searchParams.set("api_key", process.env.GISTDA_API_KEY || "unconfigured");
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
+    const body = await res.text();
+    return { status: res.status, body: body.slice(0, 220) };
+  } catch (error) {
+    return {
+      status: 0,
+      body: error instanceof Error ? error.message : "probe failed",
+    };
+  }
+}
