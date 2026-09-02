@@ -616,7 +616,7 @@ export const nicheApis: SatelliteApi[] = [
     coverage: "Thailand — flood, drought, burnt-area products",
     satellites: ["GISTDA disaster mapping (multi-sensor)"],
     notes:
-      "Disaster Platform Open API. Docs: https://disaster.gistda.or.th/services/open-api . Register at https://api-gateway.gistda.or.th/v2 . Do not call /app-api/proxy internals. THEOS archive remains portal/commercial.",
+      "Disaster Platform Open API (docs UI only — Knowledge nav has no other developer URL). Do not call /app-api/proxy internals. STAC + Sentinel-1C/1D download rows are retrospective, not a live tile CDN. THEOS archive remains portal/commercial.",
     tier: "niche",
     docsUrl: "https://disaster.gistda.or.th/services/open-api",
   },
