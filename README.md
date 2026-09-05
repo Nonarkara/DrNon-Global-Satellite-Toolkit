@@ -10,6 +10,10 @@ A production-grade, open-source framework for building satellite-powered dashboa
 >
 > **Original compilation, system design, architecture & product by Dr Non Arkaraprasertkul.**
 
+<p align="center">
+  <img src="assets/banner.jpg" alt="DrNon Global Satellite Toolkit — See Everything. Build Anything. Deploy Anywhere." width="100%" />
+</p>
+
 ---
 
 ## What This Is
@@ -115,6 +119,13 @@ It started as a hobby — "how many satellite feeds can I stack onto one map?" �
 │  Add a module → it appears in the UI. Remove it → it vanishes.     │
 └─────────────────────────────────────────────────────────────────────┘
 ```
+
+## Quick Links
+
+- 📘 **Documentation** — [Architecture](./docs/architecture.md) · [Authoring a module](./docs/authoring-a-module.md) · [Module contract](./CLAUDE.md)
+- 🚀 **Examples** — [City Monitor (Bangkok)](./examples/city-monitor/README.md) · [Disaster Watch](./examples/disaster-watch/README.md) · [Southeast Asia regional](./examples/southeast-asia/README.md)
+- 🤖 **For AI agents** — [AGENTS.md](./AGENTS.md) (cross-agent) · [CLAUDE.md](./CLAUDE.md) (Claude Code)
+- 🤝 **Contributing** — [CONTRIBUTING.md](./CONTRIBUTING.md) · [Code of Conduct](./CODE_OF_CONDUCT.md) · [Security](./SECURITY.md) · [Open an issue](../../issues/new/choose)
 
 ### Fallback Philosophy
 

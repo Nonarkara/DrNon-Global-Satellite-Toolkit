@@ -1,0 +1,74 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Cancel in-progress runs for the same branch on a new push.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Minimum permissions per 2026 GitHub Actions hardening guidance.
+# https://docs.github.com/en/actions/security-for-github-actions/security-guides/security-hardening-for-github-actions
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Lint + Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Build
+        run: npm run build
+        env:
+          # Build with no secrets so the production build is reproducible in CI.
+          # Real keys belong in repo Settings → Secrets, not in the workflow.
+          NEXT_TELEMETRY_DISABLED: "1"
+
+  python-ingest:
+    name: Python ingest smoke test
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Python
+        uses: actions/setup-python@0a5c61591373683505ea898e09a3ea4f39ef2b9c # v5.0.0
+        with:
+          python-version: "3.11"
+          cache: "pip"
+          cache-dependency-path: ingestion/requirements.txt
+
+      - name: Install
+        working-directory: ingestion
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Import smoke test
+        working-directory: ingestion
+        run: |
+          python -c "import firms_ingest; print('import ok')"
