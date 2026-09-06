@@ -1,3 +1,15 @@
+# ── Core ──────────────────────────────────────────────────────────────────
 requests>=2.31.0
-psycopg2-binary>=2.9.9
 python-dotenv>=1.0.0
+
+# ── STAC: the lingua franca of satellite catalogs ─────────────────────────
+# Verified 2026-09-06 against Earth Search, Planetary Computer and CDSE.
+pystac-client>=0.8.3
+planetary-computer>=1.0.0
+
+# ── Raster access ─────────────────────────────────────────────────────────
+# odc-stac loads STAC items straight into xarray. Preferred over stackstac,
+# which has been unmaintained since 2024.
+odc-stac>=0.3.10
+rioxarray>=0.17.0
+xarray>=2024.6.0

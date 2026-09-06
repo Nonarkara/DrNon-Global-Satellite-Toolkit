@@ -14,20 +14,31 @@ export const aqicnThailand: ModuleDefinition<AqicnStation[]> = {
   label: "AQICN Thailand",
   category: "environmental",
   description:
-    "Real-time PM2.5 and PM10 readings from AQICN/WAQI stations across Thailand, including Bangkok and Chiang Mai.",
-  pollInterval: 600,
+    "Real-time PM2.5 and PM10 from AQICN/WAQI stations across Thailand. Requires a free token — the public 'demo' token returns no stations.",
+  pollInterval: 900,
   uiType: "table",
+  sourceId: "aqicn",
+  requiredEnvVars: ["AQICN_TOKEN"],
   tableColumns: [
     { key: "station", label: "Station" },
     { key: "aqi", label: "AQI" },
     { key: "time", label: "Updated" },
   ],
 
-  async fetchData() {
-    // WAQI map bounds API — Thailand bounding box
+  async fetchData(): Promise<AqicnStation[]> {
+    // The public "demo" token is accepted but returns an empty station list,
+    // which previously surfaced as a "live" module with zero rows.
+    const token = process.env.AQICN_TOKEN;
+    if (!token) {
+      throw new Error(
+        "AQICN_TOKEN not set — get a free token at https://aqicn.org/data-platform/token/",
+      );
+    }
+
+    // WAQI map-bounds API over the Thailand bounding box.
     const url =
-      "https://api.waqi.info/v2/map/bounds?latlng=5.6,97.3,20.5,105.7&networks=all&token=demo";
-    const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
+      `https://api.waqi.info/v2/map/bounds?latlng=5.6,97.3,20.5,105.7&networks=all&token=${encodeURIComponent(token)}`;
+    const res = await fetch(url, { signal: AbortSignal.timeout(12_000) });
     if (!res.ok) throw new Error(`AQICN: ${res.status}`);
     const json = (await res.json()) as {
       status?: string;
@@ -40,7 +51,11 @@ export const aqicnThailand: ModuleDefinition<AqicnStation[]> = {
       }>;
     };
 
-    if (json.status !== "ok" || !json.data) return [];
+    // Never swallow this: a bad or throttled token returns status "error"
+    // with a 200, which would otherwise look like a healthy empty result.
+    if (json.status !== "ok" || !json.data) {
+      throw new Error(`AQICN returned status "${json.status ?? "unknown"}"`);
+    }
 
     return json.data
       .filter((s) => s.aqi !== "-" && s.aqi !== "")

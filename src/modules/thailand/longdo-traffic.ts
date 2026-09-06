@@ -18,6 +18,9 @@ export const longdoTraffic: ModuleDefinition<TrafficIncident[]> = {
     "Thai traffic incidents, congestion, and ITS data from Longdo Map — road closures, accidents, and speed reports.",
   pollInterval: 120,
   uiType: "feed",
+  // Upstream unavailable: traffic.longdo.com/feed/json returned 404 on 2026-09-06 — Longdo now requires a keyed API.
+  // Serving a fixture until a working endpoint is found.
+  fixtureOnly: true,
 
   async fetchData() {
     // Longdo Map traffic events RSS/JSON feed

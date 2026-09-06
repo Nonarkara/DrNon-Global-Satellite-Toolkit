@@ -41,10 +41,21 @@ export interface ModuleDefinition<TData = unknown> {
     yKey: string;
     color?: string;
   };
-  /** If this wraps an existing API route, note it here for docs */
+  /**
+   * Deprecated. Modules now call their upstream directly; nothing in this
+   * repo wraps an internal route. Retained so existing forks still compile.
+   */
   wrapsExisting?: string;
   /** Env vars required for this module to work (e.g. ["SENTINEL_HUB_KEY"]) */
   requiredEnvVars?: string[];
+  /** Links this module to an entry in `src/sources` for provenance and gotchas. */
+  sourceId?: string;
+  /**
+   * True when no public machine API exists for this data and `mockData` is a
+   * hand-maintained fixture. Keeps the catalog honest: a fixture module never
+   * reports tier "live", no matter what keys are set.
+   */
+  fixtureOnly?: boolean;
 }
 
 /** Client-safe metadata (no fetchData/mockData, which are server-only) */
@@ -62,8 +73,17 @@ export interface ModuleMetadata {
     yKey: string;
     color?: string;
   };
+  /** @deprecated — see ModuleDefinition.wrapsExisting */
   wrapsExisting?: string;
   requiredEnvVars?: string[];
+  /** Links this module to an entry in `src/sources` for provenance and gotchas. */
+  sourceId?: string;
+  /**
+   * True when no public machine API exists for this data and `mockData` is a
+   * hand-maintained fixture. Keeps the catalog honest: a fixture module never
+   * reports tier "live", no matter what keys are set.
+   */
+  fixtureOnly?: boolean;
   /** Whether required env vars are present (set at API response time) */
   configured?: boolean;
 }

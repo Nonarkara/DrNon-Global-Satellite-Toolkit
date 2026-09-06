@@ -18,6 +18,9 @@ export const thailandOpenData: ModuleDefinition<GovDataset[]> = {
     "Thailand Government Open Data Portal (data.go.th) — demographics, transport, economy, environment, and health datasets.",
   pollInterval: 3600,
   uiType: "feed",
+  // Upstream unavailable: data.go.th timed out on 2026-09-06 — the CKAN endpoint is intermittently unreachable from outside Thailand.
+  // Serving a fixture until a working endpoint is found.
+  fixtureOnly: true,
 
   async fetchData() {
     const url =

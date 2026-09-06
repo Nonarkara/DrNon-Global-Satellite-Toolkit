@@ -66,9 +66,36 @@ jobs:
         working-directory: ingestion
         run: |
           python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          # requirements-db.txt pulls in requirements.txt plus psycopg2,
+          # which firms_ingest.py imports.
+          pip install -r requirements-db.txt
 
       - name: Import smoke test
         working-directory: ingestion
         run: |
-          python -c "import firms_ingest; print('import ok')"
+          python -c "import firms_ingest; print('firms_ingest import ok')"
+          python -c "import stac_search; print('stac_search import ok')"
+
+      - name: STAC CLI smoke test
+        working-directory: ingestion
+        continue-on-error: true
+        run: python stac_search.py --aoi bangkok --limit 3
+
+  probe-sources:
+    name: Probe data sources
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    # Public APIs rate-limit and have outages; a red probe is a signal to
+    # investigate, not a reason to block a pull request.
+    continue-on-error: true
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: "20"
+
+      - name: Probe keyless sources
+        run: node scripts/probe-sources.mjs

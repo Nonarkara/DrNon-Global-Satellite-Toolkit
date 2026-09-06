@@ -17,6 +17,9 @@ export const thailandAdmin: ModuleDefinition<ThaiProvince[]> = {
     "Administrative metadata for all 77 Thai provinces — names, regions, and basic statistics from OpenThailand API.",
   pollInterval: 0,
   uiType: "table",
+  // Upstream unavailable: api.openthailand.org did not resolve on 2026-09-06 — the service appears to be offline.
+  // Serving a fixture until a working endpoint is found.
+  fixtureOnly: true,
   tableColumns: [
     { key: "nameEn", label: "Province" },
     { key: "nameTh", label: "ชื่อ" },

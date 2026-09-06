@@ -19,6 +19,9 @@ export const srtTrains: ModuleDefinition<SrtTrain[]> = {
     "State Railway of Thailand (SRT) train positions and status — Bangkok-Chiang Mai, Bangkok-Padang Besar, and other routes.",
   pollInterval: 120,
   uiType: "table",
+  // Upstream unavailable: SRT ttsview.railway.co.th/SRT_Schedule/GetTrainRunning returned 404 on 2026-09-06 — the endpoint moved or was withdrawn.
+  // Serving a fixture until a working endpoint is found.
+  fixtureOnly: true,
   tableColumns: [
     { key: "trainNo", label: "Train" },
     { key: "trainName", label: "Name" },

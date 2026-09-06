@@ -16,6 +16,9 @@ export const tmdWeather: ModuleDefinition<TmdWarning[]> = {
     "Thai Meteorological Department weather warnings, forecasts, and severe weather alerts for Thailand.",
   pollInterval: 600,
   uiType: "feed",
+  // Upstream unavailable: www.tmd.go.th/rss/warning.xml returned 404 on 2026-09-06 — TMD retired the public RSS feed in favour of a keyed API.
+  // Serving a fixture until a working endpoint is found.
+  fixtureOnly: true,
 
   async fetchData() {
     // TMD RSS feed for weather warnings

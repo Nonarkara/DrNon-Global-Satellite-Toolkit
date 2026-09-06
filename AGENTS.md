@@ -1,62 +1,184 @@
 # AGENTS.md
 
-Instructions for AI coding agents working on this repository. This file follows the [agents.md](https://agents.md) spec and is consumed by Codex, Cursor, Aider, Gemini CLI, and other agent runtimes. **For Claude Code, see [`CLAUDE.md`](./CLAUDE.md), which is more detailed.**
+Instructions for AI coding agents working on this repository. Follows the
+[agents.md](https://agents.md) spec and is consumed by Claude Code, Codex,
+Cursor, Aider, Gemini CLI and other agent runtimes.
 
-## Project at a glance
+**If you are an agent that has just been pointed at this repo, read this file
+first, then run `npm run probe`. That single command tells you which of the 38
+catalogued data sources are alive right now.**
 
-- **Type:** Next.js 15 + React 19 + TypeScript 5 + Tailwind 4 + Deck.gl 9 dashboard framework
-- **Purpose:** Production-grade template for satellite / OSINT / smart-city dashboards — clone, pick a geography, deploy
-- **Author / maintainer:** Dr Non Arkaraprasertkul ([@Nonarkara](https://github.com/Nonarkara))
+## The 60-second orientation
+
+```bash
+npm install && npm run dev     # dashboard on :3000
+npm run probe                  # verify every keyless data source is alive
+open http://localhost:3000/imagery
+```
+
+`/imagery` searches real Sentinel-2 and Landsat scenes and renders them. It
+needs no API key, because the whole imagery path runs on public archives:
+
+```
+STAC search  →  public COG asset  →  dynamic tiler  →  XYZ tiles  →  deck.gl
+Earth Search    sentinel-cogs S3     TiTiler           map layer
+```
+
+Verified end-to-end on 2026-09-06 over Bangkok.
+
+## What this project is
+
+- **Type:** Next.js 15 + React 19 + TypeScript 5 + Tailwind 4 + Deck.gl 9
+- **Purpose:** A template for satellite / situational-awareness dashboards —
+  clone it, pick a geography, ship it
+- **Author:** Dr Non Arkaraprasertkul ([@Nonarkara](https://github.com/Nonarkara))
 - **License:** MIT
 
-## Before you start
+## Map of the codebase
 
-1. **Read `README.md`** for the user-facing pitch and capability list.
-2. **Read `CLAUDE.md`** (Claude Code) or this file (other agents) for the module contract, the design system, and the architecture.
-3. **Read `docs/architecture.md`** to understand how the module system, map engine, storage tier, and overlay system compose.
-4. **Read `docs/authoring-a-module.md`** if you are adding or modifying a module — it is the most common contributor action.
+| You want to… | Go to |
+|---|---|
+| Know which data source to use | `src/sources/` → rendered as `docs/data-sources.md` |
+| Search satellite imagery | `src/stac/` (`client.ts`, `backends.ts`, `preview.ts`) |
+| Render imagery on a map | `src/engine/cog-layer.ts`, `src/engine/map-engine.ts` |
+| Add or edit a data feed | `src/modules/` + `src/modules/registry.ts` |
+| Add an API route | `src/app/api/` |
+| Do analysis in Python | `ingestion/stac_search.py` |
+| Verify a source still works | `scripts/probe-sources.mjs` |
 
 ## Ground rules
 
-- **The default works with zero configuration.** Every module must ship a realistic `mockData` and degrade gracefully when API keys are missing. Do not introduce changes that break the zero-config path.
-- **One file per module.** Adding a module = copy `src/modules/_template.ts` + one import + one array entry in `src/modules/registry.ts`. Removing = the reverse. Don't reach across module boundaries.
-- **Server-side fetches only.** `fetchData()` runs on the server (Next.js route handlers). Never call external APIs from the React component.
-- **Use the design tokens, not raw colors.** All visual values come from CSS custom properties defined in `src/app/globals.css` (`--bg`, `--ink`, `--cool`, `--danger`, `--line`, ...). See the design-system table in `CLAUDE.md`.
-- **Mock data is part of the contract.** When you change a module's schema, update `mockData` in the same commit. The dashboard must look right with zero API keys.
-- **Metadata everywhere.** Tile fetches and API calls log `provider`, `timestamp`, `latency`, `status`. Don't strip this — it's the audit trail.
+### 1. Never claim data is live when it is not
 
-## Common tasks
+This is the rule that matters most here. The module contract has three honest
+states, and the API enforces them:
 
-| Task | Where to look | How long it should take |
-|---|---|---|
-| Add a new data module | `src/modules/_template.ts` + `docs/authoring-a-module.md` | 10–30 min for a simple feed |
-| Add a new basemap | `src/basemaps/basemap-catalog.ts` | 5 min |
-| Add a new satellite overlay | `src/overlays/map-overlays.ts` | 5 min |
-| Add a new API to the registry | `src/registry/global-satellite-apis.ts` | 5 min |
-| Tweak a dashboard panel | `src/app/page.tsx` + `src/components/` | varies |
-| Add an ingestion script | `ingestion/` (Python) | 30 min for a typical FIRMS-style ingest |
+| State | Meaning |
+|---|---|
+| `tier: "live"` | `fetchData()` succeeded against a real upstream |
+| `tier: "mock"` | The fetch failed or a key is missing; `mockData` is served |
+| `fixtureOnly: true` | No public API exists. The fetch is never attempted |
 
-## Build, lint, test
+If you find a module whose upstream is dead, **mark it `fixtureOnly: true` with
+a dated comment recording what the endpoint returned.** Do not leave it looking
+live. Do not `return []` on failure — throw, so the route can label it honestly.
+
+### 2. The zero-config path must keep working
+
+`npm run dev` on a fresh clone with no `.env` must render real data. Six
+modules are live with no credentials at all. If a change breaks that, it is
+the wrong change.
+
+### 3. Verify before you document
+
+Every entry in `src/sources/` carries a `verified` block with a date, the exact
+probe URL and what came back. If you add a source, **probe it first** and add a
+matching case to `scripts/probe-sources.mjs`. A source that has not been probed
+does not go in the registry.
+
+### 4. One file per module
+
+Adding a module = copy `src/modules/_template.ts` + one import + one array
+entry in `src/modules/registry.ts`. Don't reach across module boundaries.
+
+### 5. Server-side fetches only
+
+`fetchData()` runs in a Next.js route handler. Never call an external API from
+a React component — keys leak and CORS breaks.
+
+### 6. Use the design tokens
+
+All colour comes from CSS custom properties in `src/app/globals.css`
+(`--bg`, `--ink`, `--cool`, `--danger`, `--line`, …). No raw hex.
+
+### 7. Regenerate docs, don't hand-edit them
+
+`docs/data-sources.md` is generated. Change `src/sources/`, then run
+`npm run docs:sources`.
+
+## Commands
 
 ```bash
-npm install
-npm run lint      # ESLint via next lint
-npm run build     # next build
-npm run dev       # local dev server on :3000
+npm run dev            # dev server on :3000
+npm run verify         # typecheck + lint + build — what CI runs
+npm run probe          # probe keyless sources against the live internet
+npm run probe:all      # include sources needing credentials
+npm run probe -- --json  # machine-readable, for an agent to parse
+npm run docs:sources   # regenerate docs/data-sources.md from src/sources/
+
+make python            # Python STAC env in ingestion/.venv
+make notebook          # + JupyterLab and leafmap
+docker compose up      # app plus a self-hosted TiTiler
 ```
 
-There is no separate test runner. Smoke-test by `npm run build` succeeding and `npm run dev` rendering mock data on every enabled module. The CI workflow (`.github/workflows/ci.yml`) runs lint + type check + build + Python import smoke test on every push and PR.
+There is no unit-test runner. `npm run verify` passing plus `npm run probe`
+reporting all green is the bar.
+
+## Task recipes
+
+<details>
+<summary><b>Retarget the dashboard to a different city or country</b></summary>
+
+1. `src/modules/earth-observation/stac-imagery.ts` — change `BBOX`
+2. `src/components/ImageryExplorer.tsx` — change `PRESETS`
+3. `src/modules/environmental/open-meteo-aqi.ts` — change `STATIONS`
+4. `src/modules/earth-observation/nasa-firms.ts` — change `AREA`
+   (west,south,east,north — the reverse of most APIs)
+5. `src/modules/orbital-air-traffic/opensky-network.ts` — change `BBOX`
+6. `ingestion/stac_search.py` — add to `AOIS`
+7. Drop Thailand-specific modules from `src/modules/registry.ts`
+</details>
+
+<details>
+<summary><b>Add a new data source</b></summary>
+
+1. **Probe it first.** `curl` the endpoint; record the status, size and shape.
+2. Add a `DataSource` entry to the right file in `src/sources/` with a real
+   `verified` block, an honest `tier`, and the gotchas you hit.
+3. Add a probe case to `scripts/probe-sources.mjs`; run `npm run probe`.
+4. If it should surface in the UI, copy `src/modules/_template.ts`, set
+   `sourceId` to your new source's id, and register it.
+5. `npm run docs:sources && npm run verify`
+</details>
+
+<details>
+<summary><b>Revive a fixture-only module</b></summary>
+
+Twelve modules are `fixtureOnly` because their upstream returned 404/403 or
+timed out on 2026-09-06 — mostly Thai government feeds and agency portals with
+no open API. Each carries a comment saying exactly what happened. To revive one:
+find a working endpoint, rewrite `fetchData()`, delete the `fixtureOnly` flag
+and the stale comment, and confirm `tier: "live"` at
+`/api/modules/<id>`.
+</details>
+
+<details>
+<summary><b>Move off the public tiler</b></summary>
+
+`https://titiler.xyz` is a courtesy demo with no SLA. For anything real:
+
+```bash
+docker run -p 8000:8000 ghcr.io/developmentseed/titiler:latest
+echo 'NEXT_PUBLIC_TITILER_URL=http://localhost:8000' >> .env
+```
+
+`src/stac/preview.ts` reads that variable; nothing else changes.
+</details>
 
 ## Out of scope (don't add unless asked)
 
-- Orbit propagation / TLE math — this repo consumes pre-processed tiles, not raw imagery
-- Streamlit / Dash / Python dashboards — the dashboard *is* the Next.js app
-- Database migrations — storage tiers are pluggable, not a single schema
-- Authentication / user accounts — out of scope for the template; downstream forks add their own
+- Authentication or user accounts — forks add their own
+- Database migrations — storage tiers are pluggable, not one schema
+- Heavy raster processing in Node — that belongs in `ingestion/` (Python) or
+  ESA SNAP; the web app consumes tiles
 - Internationalization — copy is English-only by design
 
 ## Attribution
 
-Original compilation, system design, architecture, and product: **Dr Non Arkaraprasertkul** ([nonarkara.org](https://nonarkara.org), [GitHub @Nonarkara](https://github.com/Nonarkara)). PhD MA Harvard | MPhil Oxon | SM UrbanCertDes MIT | BArch First Class Honors. Senior Expert in Smart City Promotion, Digital Economy Promotion Agency of Thailand (depa).
+Original compilation, system design and architecture: **Dr Non Arkaraprasertkul**
+([nonarkara.org](https://nonarkara.org), [@Nonarkara](https://github.com/Nonarkara)).
+PhD MA Harvard | MPhil Oxon | SM UrbanCertDes MIT | BArch First Class Honors.
+Senior Expert in Smart City Promotion, Digital Economy Promotion Agency of
+Thailand (depa).
 
-If you contribute, keep this attribution intact in `README.md`.
+Keep this attribution intact in `README.md` if you contribute.

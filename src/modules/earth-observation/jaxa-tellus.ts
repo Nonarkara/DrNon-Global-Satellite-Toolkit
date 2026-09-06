@@ -16,6 +16,9 @@ export const jaxaTellus: ModuleDefinition<JaxaResult> = {
     "JAXA/Tellus Earth observation — ALOS, GCOM-C, Himawari data. Typhoons, SST, precipitation, and snow cover over the Western Pacific.",
   pollInterval: 3600,
   uiType: "stat-card",
+  // Upstream unavailable: gportal.jaxa.jp/gpr/search/catalog returned 403 on 2026-09-06 — G-Portal requires an authenticated session.
+  // Serving a fixture until a working endpoint is found.
+  fixtureOnly: true,
 
   async fetchData() {
     // JAXA G-Portal / Tellus API

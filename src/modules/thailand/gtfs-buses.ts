@@ -17,6 +17,9 @@ export const gtfsBuses: ModuleDefinition<GtfsRoute[]> = {
     "GTFS bus route data for Bangkok and Thai cities — routes, stops, schedules from open transit data.",
   pollInterval: 0,
   uiType: "table",
+  // Upstream unavailable: transit.land returned 401 on 2026-09-06 — the v2 REST API now requires an API key.
+  // Serving a fixture until a working endpoint is found.
+  fixtureOnly: true,
   tableColumns: [
     { key: "routeId", label: "Route" },
     { key: "routeName", label: "Name" },

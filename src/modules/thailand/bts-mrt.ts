@@ -18,6 +18,9 @@ export const btsMrt: ModuleDefinition<TransitStation[]> = {
     "Bangkok BTS Skytrain and MRT subway station data — routes, interchanges, and station coordinates from community APIs.",
   pollInterval: 0, // Static data, fetch once
   uiType: "table",
+  // Upstream unavailable: The community GitHub dataset (nicemak/Thailand-Train-Stations) returned 404 on 2026-09-06 — the repo or branch is gone.
+  // Serving a fixture until a working endpoint is found.
+  fixtureOnly: true,
   tableColumns: [
     { key: "name", label: "Station" },
     { key: "line", label: "Line" },

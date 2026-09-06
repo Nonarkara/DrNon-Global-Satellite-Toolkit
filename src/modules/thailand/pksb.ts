@@ -1,5 +1,4 @@
 import type { ModuleDefinition } from "../../types/modules";
-import { internalUrl } from "../lib/module-fetch";
 
 interface BusPosition {
   id: string;
@@ -11,15 +10,24 @@ interface BusPosition {
   timestamp?: string;
 }
 
+/**
+ * Phuket Smart Bus publishes no open real-time feed. This module ships a
+ * route fixture so the panel renders, and is flagged `fixtureOnly` so the
+ * catalog never claims it is live.
+ *
+ * To make it live: obtain a GTFS-Realtime VehiclePositions URL from the
+ * operator, then replace fetchData with a protobuf decode
+ * (`gtfs-realtime-bindings`) and drop the fixtureOnly flag.
+ */
 export const pksbTransit: ModuleDefinition<BusPosition[]> = {
   id: "pksb-transit",
-  label: "Phuket Smart Bus",
+  label: "Phuket Smart Bus (fixture)",
   category: "thailand",
   description:
-    "Live positions and routes of Phuket Smart Bus (PKSB) transit vehicles.",
-  pollInterval: 60,
+    "Phuket Smart Bus route reference. No public real-time feed exists — this is a static fixture, not live vehicle data.",
+  pollInterval: 0,
   uiType: "table",
-  wrapsExisting: "/api/transit/pksb",
+  fixtureOnly: true,
   tableColumns: [
     { key: "route", label: "Route" },
     { key: "latitude", label: "Lat" },
@@ -27,25 +35,28 @@ export const pksbTransit: ModuleDefinition<BusPosition[]> = {
     { key: "speed", label: "Speed" },
   ],
 
-  async fetchData() {
-    const res = await fetch(internalUrl("/api/transit/pksb"), {
-      signal: AbortSignal.timeout(10000),
-    });
-    if (!res.ok) throw new Error(`PKSB proxy: ${res.status}`);
-    const json = await res.json();
-    if (json && Array.isArray(json.vehicles)) return json.vehicles as BusPosition[];
-    if (Array.isArray(json)) return json as BusPosition[];
-    return [];
+  async fetchData(): Promise<BusPosition[]> {
+    throw new Error(
+      "pksb-transit is fixture-only: Phuket Smart Bus publishes no open real-time API.",
+    );
   },
 
   mockData: [
     {
       id: "bus-01",
-      route: "Airport-Patong",
+      route: "Airport – Patong",
       latitude: 7.88,
       longitude: 98.39,
       speed: 35,
       heading: 180,
+    },
+    {
+      id: "bus-02",
+      route: "Airport – Rawai",
+      latitude: 8.11,
+      longitude: 98.31,
+      speed: 52,
+      heading: 165,
     },
   ],
 };

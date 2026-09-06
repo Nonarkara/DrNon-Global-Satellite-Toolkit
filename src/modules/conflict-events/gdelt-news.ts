@@ -22,7 +22,9 @@ export const gdeltNews: ModuleDefinition<GdeltNewsItem[]> = {
   async fetchData() {
     const url =
       "https://api.gdeltproject.org/api/v2/doc/doc?query=(Thailand%20OR%20ASEAN%20OR%20Southeast%20Asia)&mode=ArtList&maxrecords=40&format=json&sort=DateDesc";
-    const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
+    // GDELT commonly takes 10–25 s and throttles hard; 10 s timed out
+    // on every call. Do not poll this faster than the pollInterval.
+    const res = await fetch(url, { signal: AbortSignal.timeout(30_000) });
     if (!res.ok) throw new Error(`GDELT News: ${res.status}`);
     const json = (await res.json()) as { articles?: GdeltNewsItem[] };
     return json.articles ?? [];

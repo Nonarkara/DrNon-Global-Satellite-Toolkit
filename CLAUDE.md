@@ -7,12 +7,31 @@ This is a **dashboard template** for building real-time data dashboards with sat
 ## Quick Start
 
 ```bash
-npm install
-npm run dev
-# Open http://localhost:3000
+npm install && npm run dev     # http://localhost:3000
+npm run probe                  # verify every keyless data source is alive
 ```
 
-All 30 modules render mock data with zero API keys. Add keys to `.env` to activate live data.
+Then open **http://localhost:3000/imagery** — it searches real Sentinel-2 and
+Landsat scenes and renders them, with no API key.
+
+**Zero-config reality check.** Of 32 modules: **6 are live with no credentials**
+(`stac-imagery`, `nasa-gibs`, `opensky-network`, `celestrak`, `open-meteo-aqi`,
+`google-trends`), 14 need a key, and 12 are `fixtureOnly` because their upstream
+was probed dead on 2026-09-06. `/api/modules/<id>` reports `tier: "live" | "mock"`
+honestly — never assume a module is live without checking.
+
+## The imagery pipeline
+
+```
+STAC search  →  public COG  →  dynamic tiler  →  XYZ tiles  →  deck.gl
+src/stac/       sentinel-cogs   TiTiler          src/engine/cog-layer.ts
+client.ts       (anonymous S3)  (titiler.xyz)
+```
+
+Four STAC backends, all verified working with no credentials:
+`earth-search` (default — public COGs, no signing), `planetary-computer`
+(widest catalog; assets need free SAS signing), `cdse` (authoritative ESA),
+`nasa-cmr` (NASA DAACs). See `src/stac/backends.ts`.
 
 ## Architecture
 
@@ -22,13 +41,16 @@ src/
 │   ├── layout.tsx                        # Root layout
 │   ├── globals.css                       # Design tokens (--bg, --ink, --cool, etc.)
 │   ├── page.tsx                          # Starter page — replace with your dashboard
-│   └── api/modules/
-│       ├── catalog/route.ts              # GET → all module metadata
-│       └── [id]/route.ts                 # GET → module data (live or mock fallback)
+│   ├── imagery/page.tsx                  # Working imagery explorer — no key needed
+│   └── api/
+│       ├── modules/catalog/route.ts      # GET → all module metadata
+│       ├── modules/[id]/route.ts         # GET → module data (live or mock fallback)
+│       ├── stac/search/route.ts          # GET → scenes with ready tile URLs
+│       ├── stac/collections/route.ts     # GET → backends / collections
+│       └── sources/route.ts              # GET → the curated source registry as JSON
 ├── modules/
 │   ├── registry.ts                       # Central index — add/remove modules here
 │   ├── _template.ts                      # Copy this to create a new module
-│   ├── lib/module-fetch.ts               # Internal URL helper
 │   ├── hooks/useModuleData.ts            # React hook with auto-polling
 │   ├── components/
 │   │   ├── ModulePanel.tsx               # Renders any module by uiType
@@ -40,6 +62,16 @@ src/
 │   ├── environmental/                    # AQI, OpenAQ, AQICN, TMD, Meteoblue
 │   ├── news-info/                        # Google Trends, News API
 │   └── thailand/                         # SRT, BTS/MRT, Longdo Traffic, Highway Cams, GTFS
+├── sources/                              # Curated source registry — 38 probed entries
+│   ├── types.ts                          #   DataSource: tier, auth, verified, howTo, gotchas
+│   ├── imagery-catalogs.ts               #   STAC APIs, agency archives, tile services
+│   ├── live-feeds.ts                     #   Fires, flights, air quality, events, orbits
+│   └── tooling.ts                        #   Libraries, CLIs, MCP servers worth adopting
+├── stac/                                 # STAC client — the imagery framework
+│   ├── backends.ts                       #   4 verified endpoints
+│   ├── client.ts                         #   searchStac / listCollections / signAssetHref
+│   └── preview.ts                        #   STAC item → XYZ tile URLs via TiTiler
+├── engine/cog-layer.ts                   # Deck.gl layers for STAC/COG imagery
 ├── engine/map-engine.ts                  # Deck.gl layer factories (GIBS, MODIS, VIIRS, fire)
 ├── overlays/map-overlays.ts              # 10 satellite overlay definitions
 ├── basemaps/basemap-catalog.ts           # 12 basemaps with fallback chain
@@ -74,15 +106,16 @@ Replace the starter page with the dashboard layout. Typical structure:
 Enable relevant modules in `src/modules/registry.ts` by keeping/removing entries from the `ALL_MODULES` array. Available modules:
 
 **Earth Observation** (no key needed unless noted):
-- `nasa-firms` — Fire detection (wraps /api/fires)
-- `nasa-gibs` — Satellite imagery tiles (wraps /api/map/overlays)
+- `stac-imagery` — Sentinel-2 scene search with tile URLs (no key) 🟢
+- `nasa-firms` — Fire detection, direct from the FIRMS API (needs FIRMS_KEY)
+- `nasa-gibs` — GIBS tile templates, built locally (no key) 🟢
 - `sentinel-hub` — Processed Sentinel imagery (needs SENTINEL_HUB_KEY)
 - `isro-bhoonidhi` — ISRO 46-satellite archive
 - `jaxa-tellus` — JAXA Earth observation
 - `gk2a-korea` — GK2A geostationary weather
 
 **Orbital & Air Traffic**:
-- `opensky-network` — Real-time flight tracking (wraps /api/flights)
+- `opensky-network` — Live ADS-B, direct from OpenSky (no key) 🟢
 - `celestrak` — Satellite TLE tracking (free)
 - `space-track` — NORAD catalog (needs SPACE_TRACK_USER/PASS)
 - `flightlabs-thai` — BKK/DMK aviation (needs FLIGHTLABS_KEY)
@@ -95,7 +128,7 @@ Enable relevant modules in `src/modules/registry.ts` by keeping/removing entries
 - `predicthq` — Event intelligence (needs PREDICTHQ_KEY)
 
 **Environmental**:
-- `open-meteo-aqi` — Air quality (wraps /api/air-quality)
+- `open-meteo-aqi` — Air quality, direct from Open-Meteo (no key) 🟢
 - `openaq` — Global AQ stations (free, no key)
 - `aqicn-thailand` — Thai PM2.5 stations (free, no key)
 - `tmd-weather` — Thai Met Dept forecasts (free, no key)
@@ -103,11 +136,11 @@ Enable relevant modules in `src/modules/registry.ts` by keeping/removing entries
 - `meteosource-thai` — Hyperlocal Thai weather (needs METEOSOURCE_KEY)
 
 **News & Info**:
-- `google-trends` — Trending topics (wraps /api/trends)
+- `google-trends` — Trending topics via Google's public RSS (no key) 🟢
 - `news-api` — Global news aggregation (needs NEWS_API_KEY)
 
 **Thailand**:
-- `pksb-transit` — Phuket Smart Bus (wraps /api/transit/pksb)
+- `pksb-transit` — Phuket Smart Bus ⚪ fixture only (no open feed exists)
 - `srt-trains` — State Railway tracking (free)
 - `bts-mrt` — BTS/MRT routes (community data, free)
 - `longdo-traffic` — Traffic feeds (free)
@@ -150,8 +183,38 @@ Every module implements `ModuleDefinition<TData>`:
   uiType: ModuleUiType;    // table | feed | chart | stat-card | ticker | map-layer
   tableColumns?: [];        // For table rendering
   requiredEnvVars?: [];     // Env vars needed for live data
+  sourceId?: string;        // Links to an entry in src/sources for provenance
+  fixtureOnly?: boolean;    // No public API exists — never reports tier "live"
 }
 ```
+
+### The honesty contract
+
+`/api/modules/[id]` reports one of three states, and you must not blur them:
+
+| State | When |
+|---|---|
+| `tier: "live"` | `fetchData()` succeeded against a real upstream |
+| `tier: "mock"` | Fetch failed or a key is missing — `mockData` served |
+| `fixtureOnly: true` | No public API exists; the fetch is never attempted |
+
+Two rules follow:
+- **Throw, never swallow.** A `fetchData()` that catches an error and returns
+  `[]` produces a module that reports `live` with zero rows. That bug was in
+  `aqicn-thailand`; don't reintroduce it.
+- **Dead upstream → `fixtureOnly: true`** with a dated comment saying what the
+  endpoint returned.
+
+### Verifying sources
+
+```bash
+npm run probe            # keyless sources — must be all green
+npm run probe:all        # include credentialed sources
+npm run probe -- --json  # machine-readable
+```
+
+Adding a source means adding a `DataSource` entry in `src/sources/` **and** a
+probe case in `scripts/probe-sources.mjs`, then `npm run docs:sources`.
 
 ## React Integration
 

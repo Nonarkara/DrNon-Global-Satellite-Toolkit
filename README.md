@@ -16,11 +16,29 @@ A production-grade, open-source framework for building satellite-powered dashboa
 
 ---
 
+## Run it in 30 seconds
+
+```bash
+git clone https://github.com/Nonarkara/DrNon-Global-Satellite-Toolkit.git
+cd DrNon-Global-Satellite-Toolkit && make
+```
+
+Open **http://localhost:3000/imagery** and you are searching the live Sentinel-2
+and Landsat archives, rendering real satellite imagery, **with no API key.**
+
+```bash
+npm run probe   # verify every keyless source against the live internet
+```
+
+[Full quick start ↓](#quick-start) · [Data source guide](docs/data-sources.md) · [For AI agents](AGENTS.md)
+
+---
+
 ## What This Is
 
 This is not a satellite viewer. It's a **blueprint for building real-time global awareness systems**.
 
-42,000+ lines of TypeScript. 30 pluggable data-source modules. 20+ satellite APIs from 80+ space agencies surveyed worldwide. A rendering pipeline that layers fire detection over vegetation indices over night-time lights over ocean bathymetry — on any base map, with any combination, and it always renders even when APIs go down.
+42,000+ lines of TypeScript. 32 pluggable data-source modules. 20+ satellite APIs from 80+ space agencies surveyed worldwide. A rendering pipeline that layers fire detection over vegetation indices over night-time lights over ocean bathymetry — on any base map, with any combination, and it always renders even when APIs go down.
 
 It started as a hobby — "how many satellite feeds can I stack onto one map?" — and turned into the toolkit that powers production monitoring dashboards for smart city programs.
 
@@ -143,64 +161,80 @@ Every tile fetch records metadata — provider, timestamp, latency, imagery date
 
 ---
 
-## 30 Pluggable Data-Source Modules
+## 32 Pluggable Data-Source Modules
 
 The module system is the core innovation. Each data source is a **self-contained file** — one file per API, with fetch logic, realistic mock data, and UI rendering hints. Add or remove modules by editing one line in the registry.
 
-### Earth Observation (6 modules)
-| Module | Source | What It Shows |
-|--------|--------|---------------|
-| NASA FIRMS | NASA | Active fire/thermal hotspots worldwide, updated every 3 hours |
-| NASA GIBS | NASA | 1,000+ daily satellite imagery layers via WMTS tiles |
-| Sentinel Hub | ESA | Processed Sentinel-2 + Landsat with custom band combinations |
-| ISRO Bhoonidhi | ISRO (India) | Resourcesat, NovaSAR, EOS data for South/Southeast Asia |
-| JAXA Tellus | JAXA (Japan) | ALOS, GCOM, Himawari data for Asia-Pacific |
-| GK2A | KMA (Korea) | Geostationary weather imagery for East/Southeast Asia |
+**Status key**, as measured by `npm run probe` on 2026-09-06:
+🟢 live with no credentials · 🔑 live once you add a free key · 💳 needs a paid or approval-gated account · ⚪ fixture only, upstream unavailable
+
+### Earth Observation (7 modules)
+| | Module | Source | What It Shows |
+|---|--------|--------|---------------|
+| 🟢 | **Sentinel-2 Scenes (STAC)** | Earth Search / AWS | Live scene search with ready-to-render tile URLs — 10 m optical, no key |
+| 🟢 | NASA GIBS | NASA | 1,000+ daily imagery layers as WMTS tile templates |
+| 🔑 | NASA FIRMS | NASA | Active fire/thermal hotspots, ~3 h behind overpass |
+| 💳 | Sentinel Hub | ESA | Processed Sentinel-2 + Landsat with custom band combinations |
+| ⚪ | ISRO Bhoonidhi | ISRO (India) | No open REST API — use the `bhoonidhi-downloader` CLI |
+| ⚪ | JAXA Tellus | JAXA (Japan) | G-Portal requires an authenticated session (403) |
+| ⚪ | GK2A | KMA (Korea) | No open JSON API at the documented path |
 
 ### Orbital & Air Traffic (4 modules)
-| Module | Source | What It Shows |
-|--------|--------|---------------|
-| OpenSky Network | Community | Real-time ADS-B aircraft positions worldwide |
-| CelesTrak | 18th SPCS | TLE/OMM data for every tracked object in orbit |
-| Space-Track | USSF | Official NORAD orbital catalog with decay predictions |
-| FlightLabs Thai | AirLabs | BKK/DMK arrivals, departures, and Thai carrier tracking |
+| | Module | Source | What It Shows |
+|---|--------|--------|---------------|
+| 🟢 | OpenSky Network | Community | Live ADS-B aircraft positions; add credentials for a higher quota |
+| 🟢 | CelesTrak | CelesTrak | TLE sets for Earth-observation, weather and science satellites |
+| 💳 | Space-Track | USSF | Full NORAD catalog with decay predictions (manual approval) |
+| 💳 | FlightLabs Thai | AirLabs | BKK/DMK arrivals, departures and Thai carrier tracking |
 
 ### Conflict & Events (5 modules)
-| Module | Source | What It Shows |
-|--------|--------|---------------|
-| ACLED | ACLED | Expert-coded armed conflict events, protests, political violence |
-| GDELT Events | GDELT Project | 300+ CAMEO-coded event types from global news in 65 languages |
-| GDELT News | GDELT Project | Real-time news volume and tone by geography |
-| ReliefWeb | UN OCHA | Humanitarian disaster reports, situation updates, maps |
-| PredictHQ | PredictHQ | Scheduled + unscheduled real-world events with impact scoring |
+| | Module | Source | What It Shows |
+|---|--------|--------|---------------|
+| 🟢 | GDELT Events | GDELT Project | 300+ CAMEO-coded event types from news in 65 languages |
+| 🟢 | GDELT News | GDELT Project | News volume and tone by geography |
+| 🔑 | ACLED | ACLED | Expert-coded armed conflict events, protests, political violence |
+| 💳 | PredictHQ | PredictHQ | Scheduled and unscheduled events with impact scoring |
+| 💳 | ReliefWeb | UN OCHA | v1 decommissioned; v2 needs an OCHA-approved appname |
+
+> **Note on GDELT:** healthy but slow (10–25 s) and it throttles hard. It falls
+> back to mock on a 429, which is expected — don't poll it faster than the
+> module's `pollInterval`.
 
 ### Environmental (6 modules)
-| Module | Source | What It Shows |
-|--------|--------|---------------|
-| Open-Meteo AQI | Open-Meteo | Free global air quality index with PM2.5, NO₂, O₃ |
-| OpenAQ | OpenAQ | Ground-station air quality measurements worldwide |
-| AQICN Thailand | AQICN | Thai-specific AQI with station-level PM2.5 readings |
-| TMD Weather | Thai Met Dept | Official Thai weather warnings and forecasts |
-| Meteoblue | Meteoblue | 100+ weather variables globally, 14-day forecasts |
-| Meteosource | Meteosource | Hyperlocal weather for Thai cities |
+| | Module | Source | What It Shows |
+|---|--------|--------|---------------|
+| 🟢 | Open-Meteo AQI | Open-Meteo | Global PM2.5 and US AQI for 6 stations — model, works anywhere |
+| 🔑 | AQICN Thailand | AQICN | Thai station-level PM2.5 (the public `demo` token returns nothing) |
+| 🔑 | OpenAQ | OpenAQ | Measured ground-station air quality (v2 retired, v3 needs a key) |
+| 💳 | Meteoblue | Meteoblue | 100+ weather variables globally, 14-day forecasts |
+| 💳 | Meteosource | Meteosource | Hyperlocal weather for Thai cities |
+| ⚪ | TMD Weather | Thai Met Dept | The public RSS feed was retired (404) |
 
 ### News & Information (2 modules)
-| Module | Source | What It Shows |
-|--------|--------|---------------|
-| Google Trends | Google | Real-time search interest by topic and region |
-| News API | NewsAPI | Global news aggregation with keyword/source filtering |
+| | Module | Source | What It Shows |
+|---|--------|--------|---------------|
+| 🟢 | Google Trends | Google | Daily trending search topics for Thailand, via the public RSS feed |
+| 💳 | News API | NewsAPI | Global news aggregation with keyword/source filtering |
 
 ### Thailand-Specific (8 modules)
-| Module | Source | What It Shows |
-|--------|--------|---------------|
-| Phuket Smart Bus | PKSB | Live GPS positions of Phuket public buses |
-| SRT Trains | SRT Thailand | Intercity rail positions and delay tracking |
-| BTS/MRT | Community | Bangkok metro station data and route computation |
-| Longdo Traffic | Longdo | Thai road traffic density and congestion |
-| Highway Cameras | DOH Thailand | Live highway camera feeds nationwide |
-| Gov Open Data | data.go.th | Thai government open datasets |
-| Provinces | Admin data | All 77 provinces with demographic and geographic data |
-| GTFS Buses | GTFS feeds | Standardized Bangkok bus route and schedule data |
+
+Every module in this group is currently **⚪ fixture only**. These are Thai
+government and operator feeds that were probed on 2026-09-06 and returned 404,
+403, 401 or timed out — several are unreachable from outside Thailand. Each
+module carries a comment recording exactly what happened, and the panels render
+from a fixture so the layout still works. **Reviving these is the single most
+valuable contribution to this repo** — see the recipe in [`AGENTS.md`](AGENTS.md).
+
+| | Module | Source | Probe result (2026-09-06) |
+|---|--------|--------|---------------|
+| ⚪ | Phuket Smart Bus | PKSB | No open real-time feed exists |
+| ⚪ | SRT Trains | SRT Thailand | `GetTrainRunning` → 404 |
+| ⚪ | BTS/MRT | Community | Source GitHub dataset → 404 |
+| ⚪ | Longdo Traffic | Longdo | `traffic.longdo.com/feed/json` → 404; now keyed |
+| ⚪ | Highway Cameras | DOH Thailand | `its.doh.go.th` did not resolve |
+| ⚪ | Gov Open Data | data.go.th | CKAN endpoint timed out |
+| ⚪ | Provinces | api.openthailand.org | Host did not resolve |
+| ⚪ | GTFS Buses | transit.land | → 401; v2 REST now requires a key |
 
 ---
 
@@ -359,12 +393,121 @@ Supports 5 storage backends with automatic resolution:
 ```bash
 git clone https://github.com/Nonarkara/DrNon-Global-Satellite-Toolkit.git
 cd DrNon-Global-Satellite-Toolkit
-npm install
-npm run dev
-# Open http://localhost:3000
+make
 ```
 
-No API keys required to start — every module has mock data that loads automatically. Add keys to `.env.local` as needed for live data.
+That installs and starts the dev server. Or, if you prefer npm directly:
+
+```bash
+npm install && npm run dev
+```
+
+Then open **[http://localhost:3000/imagery](http://localhost:3000/imagery)**.
+
+You are now searching the live Sentinel-2 and Landsat archives and rendering
+real satellite imagery — **with no API key, no account and no signup.** Pick a
+city, drag the cloud-cover slider, and the scenes are fetched from public
+archives at request time.
+
+### Verify it yourself
+
+```bash
+npm run probe
+```
+
+This probes every keyless data source against the live internet and prints what
+came back. Every source in this repo was verified this way on 2026-09-06; the
+script is committed so you can re-verify whenever you like rather than trusting
+the documentation.
+
+```
+  ✓ Earth Search STAC (Sentinel-2 over Bangkok)    200, 2 features
+  ✓ Planetary Computer STAC (Landsat)              200, 2 features
+  ✓ Copernicus Data Space STAC                     200, 10 collections
+  ✓ TiTiler renders a Sentinel-2 COG tile          200 image/png @ z8
+  ✓ NASA GIBS WMTS capabilities                    206
+  ✓ Open-Meteo air quality                         200, pm2.5=9.5
+  ✓ CelesTrak orbital elements                     200, 22 objects
+  ✓ OpenSky live aircraft (anonymous)              200, 20 aircraft
+  …
+  12/12 passed.  Registry matches reality.
+```
+
+### How the imagery works
+
+```
+STAC search  →  public COG  →  dynamic tiler  →  XYZ tiles  →  deck.gl
+Earth Search    sentinel-cogs   TiTiler          your map
+(no key)        (anonymous S3)  (no key)
+```
+
+[STAC](https://stacspec.org/) is the standard catalog format the whole Earth-observation
+world has converged on. This toolkit speaks it to four backends out of the box —
+**Earth Search** (AWS, default), **Microsoft Planetary Computer**, **Copernicus Data
+Space** (ESA) and **NASA CMR** — so the same query works across NASA, ESA and AWS
+archives. See [`src/stac/`](src/stac/).
+
+### What is actually live on a cold clone
+
+| | Count | |
+|---|---|---|
+| 🟢 **Live, no credentials** | 6 | `stac-imagery`, `nasa-gibs`, `opensky-network`, `celestrak`, `open-meteo-aqi`, `google-trends` |
+| 🔑 **Live once you add a free key** | 14 | FIRMS, AQICN, OpenAQ, ACLED, Space-Track, … |
+| ⚪ **Fixture only** | 12 | Upstream probed dead on 2026-09-06 — see [`docs/data-sources.md`](docs/data-sources.md) |
+
+`/api/modules/<id>` reports `tier: "live"` or `"mock"` honestly. A module never
+claims to be live when it is serving a fixture.
+
+### Python / notebooks
+
+```bash
+make python
+./ingestion/.venv/bin/python ingestion/stac_search.py --aoi bangkok --max-cloud 10
+```
+
+```
+  2026-07-19  cloud=0.3%    S2C_47PPQ_20260719_0_L2A
+  2026-07-24  cloud=5.6%    S2B_47PPQ_20260724_0_L2A
+```
+
+Built on [`pystac-client`](https://github.com/stac-utils/pystac-client) and
+[`odc-stac`](https://github.com/opendatacube/odc-stac). `make notebook` adds
+JupyterLab and [`leafmap`](https://github.com/opengeos/leafmap).
+
+### Docker
+
+```bash
+docker compose up
+```
+
+Runs the dashboard plus its own [TiTiler](https://github.com/developmentseed/titiler)
+instance, so nothing depends on the public demo tiler.
+
+### Point an AI agent at it
+
+The repo is written to be picked up cold by Claude Code, Codex, Cursor or any
+other agent runtime. [`AGENTS.md`](AGENTS.md) and [`CLAUDE.md`](CLAUDE.md) carry
+the architecture, the module contract and task recipes; `npm run probe -- --json`
+gives an agent a machine-readable picture of which sources are alive right now;
+and `GET /api/sources` serves the full curated registry — auth requirements,
+gotchas and all — as JSON.
+
+### Which data source for which question
+
+The full prioritised guide is in **[`docs/data-sources.md`](docs/data-sources.md)** —
+38 sources, each with a tier, the auth it needs, a dated probe result, usage
+instructions and the gotchas that cost real time. A sample:
+
+| I need… | Use |
+|---|---|
+| Recent optical imagery, anywhere, right now | `earth-search` (10 m Sentinel-2, keyless) |
+| A multi-decade time series | `planetary-computer` (Landsat back to 1982) |
+| To see through cloud or work at night | `asf-search` (Sentinel-1 / ALOS SAR) |
+| A daily global basemap, zero processing | `nasa-gibs-wmts` |
+| Active fires and burning-season haze | `nasa-firms` (free key) |
+| Air quality where there are no stations | `open-meteo-aqi` (keyless model) |
+| Atmospheric chemistry (NO₂, SO₂, CH₄) | `cdse-stac` → Sentinel-5P |
+| Higher resolution over South Asia | `isro-bhoonidhi` via `bhoonidhi-downloader` |
 
 ### Use as a Library
 

@@ -1,0 +1,3 @@
+# Optional: PostGIS ingestion. Only needed for firms_ingest.py.
+-r requirements.txt
+psycopg2-binary>=2.9.9

@@ -1,0 +1,6 @@
+# Optional: interactive exploration. Pulls a large dependency tree — keep it
+# out of the minimal install so `pip install -r requirements.txt` stays fast.
+-r requirements.txt
+leafmap>=0.36.0
+jupyterlab>=4.2.0
+matplotlib>=3.9.0

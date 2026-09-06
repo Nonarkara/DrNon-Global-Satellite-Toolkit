@@ -13,6 +13,7 @@ import type {
 // Earth Observation
 import { nasaFirms } from "./earth-observation/nasa-firms";
 import { nasaGibs } from "./earth-observation/nasa-gibs";
+import { stacImagery } from "./earth-observation/stac-imagery";
 import { sentinelHub } from "./earth-observation/sentinel-hub";
 import { isroBhoonidhi } from "./earth-observation/isro-bhoonidhi";
 import { jaxaTellus } from "./earth-observation/jaxa-tellus";
@@ -57,6 +58,7 @@ const ALL_MODULES: ModuleDefinition[] = [
   // Earth Observation
   nasaFirms,
   nasaGibs,
+  stacImagery,
   sentinelHub,
   isroBhoonidhi,
   jaxaTellus,
@@ -113,10 +115,21 @@ export function getModuleIds(): string[] {
   return ALL_MODULES.map((m) => m.id);
 }
 
-/** Check if all required env vars for a module are present */
+/**
+ * A module is "configured" when it can actually reach live data.
+ * Fixture-only modules never qualify, regardless of environment.
+ */
 function isModuleConfigured(mod: ModuleDefinition): boolean {
+  if (mod.fixtureOnly) return false;
   if (!mod.requiredEnvVars || mod.requiredEnvVars.length === 0) return true;
   return mod.requiredEnvVars.every((key) => !!process.env[key]);
+}
+
+/** Modules that reach live data with no credentials at all. */
+export function keylessModules(): ModuleDefinition[] {
+  return ALL_MODULES.filter(
+    (m) => !m.fixtureOnly && (m.requiredEnvVars?.length ?? 0) === 0,
+  );
 }
 
 /** Extract client-safe metadata (strips fetchData/mockData) */
@@ -132,6 +145,8 @@ export function toMetadata(mod: ModuleDefinition): ModuleMetadata {
     chartConfig: mod.chartConfig,
     wrapsExisting: mod.wrapsExisting,
     requiredEnvVars: mod.requiredEnvVars,
+    sourceId: mod.sourceId,
+    fixtureOnly: mod.fixtureOnly,
     configured: isModuleConfigured(mod),
   };
 }

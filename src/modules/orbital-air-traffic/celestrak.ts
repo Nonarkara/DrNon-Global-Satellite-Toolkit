@@ -28,14 +28,24 @@ function parseTle(text: string): TleEntry[] {
   return entries;
 }
 
+const GP_URL = "https://celestrak.org/NORAD/elements/gp.php";
+
+/** Earth-observation, weather and science platforms. CelesTrak asks callers
+ *  to cache rather than re-fetch; pollInterval is set to an hour for that. */
+const GROUPS = ["resource", "weather", "science", "stations"] as const;
+
+const USER_AGENT = "drnon-satellite-toolkit/2.1";
+const MAX_ENTRIES = 250;
+
 export const celestrak: ModuleDefinition<TleEntry[]> = {
   id: "celestrak",
   label: "CelesTrak Satellite Tracking",
   category: "orbital-air-traffic",
   description:
-    "Two-Line Element (TLE) data for active satellites and space debris from CelesTrak / NORAD catalog. Tracks overflight and revisit frequency.",
+    "Two-Line Element sets for Earth-observation, weather and science satellites from CelesTrak. Propagate with an SGP4 library to predict overpasses. No API key required.",
   pollInterval: 3600,
   uiType: "table",
+  sourceId: "celestrak",
   tableColumns: [
     { key: "name", label: "Satellite" },
     { key: "noradId", label: "NORAD ID" },
@@ -43,15 +53,32 @@ export const celestrak: ModuleDefinition<TleEntry[]> = {
     { key: "epoch", label: "Epoch" },
   ],
 
-  async fetchData() {
-    // Active satellites — CelesTrak GP data (last 30 days, compact TLE)
-    const url = "https://celestrak.org/NORAD/elements/gp.php?GROUP=active&FORMAT=tle";
-    const res = await fetch(url, { signal: AbortSignal.timeout(15000) });
-    if (!res.ok) throw new Error(`CelesTrak: ${res.status}`);
-    const text = await res.text();
-    const entries = parseTle(text);
-    // Return first 200 for dashboard use
-    return entries.slice(0, 200);
+  async fetchData(): Promise<TleEntry[]> {
+    // CelesTrak returns 403 for the bulk GROUP=active feed (verified
+    // 2026-09-06). Targeted groups are served normally and are more useful
+    // here anyway: these are the Earth-observation and weather platforms
+    // whose overpasses actually matter for imagery planning.
+    const results = await Promise.all(
+      GROUPS.map(async (group) => {
+        const res = await fetch(`${GP_URL}?GROUP=${group}&FORMAT=tle`, {
+          headers: { "User-Agent": USER_AGENT },
+          signal: AbortSignal.timeout(20_000),
+        });
+        if (!res.ok) throw new Error(`CelesTrak ${group}: ${res.status}`);
+        return parseTle(await res.text());
+      }),
+    );
+
+    // De-duplicate: a satellite can appear in more than one group.
+    const seen = new Set<string>();
+    return results
+      .flat()
+      .filter((entry) => {
+        if (seen.has(entry.noradId)) return false;
+        seen.add(entry.noradId);
+        return true;
+      })
+      .slice(0, MAX_ENTRIES);
   },
 
   mockData: [

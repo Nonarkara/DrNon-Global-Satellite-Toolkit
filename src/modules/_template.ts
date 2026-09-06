@@ -45,6 +45,10 @@ export const myModule: ModuleDefinition<MyDataItem[]> = {
   // Uncomment if this module needs API keys:
   // requiredEnvVars: ["MY_API_KEY"],
 
-  // Uncomment if wrapping an existing route:
-  // wrapsExisting: "/api/my-existing-route",
+  // Link to an entry in src/sources/ for provenance and gotchas:
+  // sourceId: "my-source-id",
+
+  // Set when no public API exists and mockData is a hand-maintained fixture.
+  // A fixtureOnly module never reports tier "live":
+  // fixtureOnly: true,
 };

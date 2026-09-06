@@ -1,35 +1,58 @@
 import type { ModuleDefinition } from "../../types/modules";
-import { internalUrl } from "../lib/module-fetch";
 
 interface TrendingTopic {
   keyword: string;
-  volume?: number;
-  source?: string;
+  volume: number;
+}
+
+/** Google's public daily-trends RSS. No key, no quota headers, no SDK. */
+const RSS = "https://trends.google.com/trending/rss";
+const GEO = "TH";
+
+/** "20K+" / "1M+" → a comparable integer. */
+function parseApproxTraffic(raw: string): number {
+  const match = raw.match(/([\d.,]+)\s*([KMB]?)/i);
+  if (!match) return 0;
+  const value = Number(match[1].replace(/,/g, ""));
+  if (!Number.isFinite(value)) return 0;
+  const multiplier = { K: 1e3, M: 1e6, B: 1e9 }[match[2].toUpperCase()] ?? 1;
+  return Math.round(value * multiplier);
+}
+
+function tagContent(block: string, tag: string): string {
+  const m = block.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)</${tag}>`));
+  if (!m) return "";
+  return m[1].replace(/<!\[CDATA\[([\s\S]*?)\]\]>/, "$1").trim();
 }
 
 export const googleTrends: ModuleDefinition<TrendingTopic[]> = {
   id: "google-trends",
-  label: "Google Trends",
+  label: "Google Trends (Thailand)",
   category: "news-info",
-  description: "Trending search topics related to Thailand and Southeast Asia.",
-  pollInterval: 600,
+  description:
+    "Daily trending search topics for Thailand from Google's public trends RSS feed. No API key required.",
+  pollInterval: 1800,
   uiType: "table",
-  wrapsExisting: "/api/trends",
   tableColumns: [
     { key: "keyword", label: "Topic" },
-    { key: "volume", label: "Volume" },
+    { key: "volume", label: "Approx. searches" },
   ],
 
   async fetchData() {
-    const res = await fetch(internalUrl("/api/trends"), {
-      signal: AbortSignal.timeout(10000),
+    const res = await fetch(`${RSS}?geo=${GEO}`, {
+      headers: { "User-Agent": "drnon-satellite-toolkit/2.1" },
+      signal: AbortSignal.timeout(12_000),
     });
-    if (!res.ok) throw new Error(`Trends proxy: ${res.status}`);
-    const json = await res.json();
-    // Handle both array and object-with-keywords shapes
-    if (Array.isArray(json)) return json as TrendingTopic[];
-    if (json && Array.isArray(json.keywords)) return json.keywords as TrendingTopic[];
-    return [];
+    if (!res.ok) throw new Error(`Google Trends RSS: ${res.status}`);
+
+    const xml = await res.text();
+    const items = xml.split("<item>").slice(1);
+    if (items.length === 0) throw new Error("Google Trends RSS returned no items");
+
+    return items.map((item) => ({
+      keyword: tagContent(item, "title"),
+      volume: parseApproxTraffic(tagContent(item, "ht:approx_traffic")),
+    }));
   },
 
   mockData: [

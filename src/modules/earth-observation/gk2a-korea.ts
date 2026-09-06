@@ -17,6 +17,9 @@ export const gk2aKorea: ModuleDefinition<Gk2aProduct[]> = {
     "GK2A geostationary weather satellite from KMA (Korea) — cloud imagery, atmospheric motion vectors, and sea surface data over East/Southeast Asia.",
   pollInterval: 1800,
   uiType: "table",
+  // Upstream unavailable: nmsc.kma.go.kr returned an HTML page rather than JSON on 2026-09-06 — there is no open JSON API at this path.
+  // Serving a fixture until a working endpoint is found.
+  fixtureOnly: true,
   tableColumns: [
     { key: "dataType", label: "Product" },
     { key: "area", label: "Area" },

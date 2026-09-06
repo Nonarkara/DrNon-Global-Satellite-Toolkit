@@ -16,6 +16,9 @@ export const isroBhoonidhi: ModuleDefinition<BhoonidhiResult> = {
     "ISRO's 46-satellite Earth observation archive — optical, SAR, and weather data over South/Southeast Asia. Agriculture, floods, and coastal monitoring.",
   pollInterval: 3600,
   uiType: "stat-card",
+  // Upstream unavailable: bhoonidhi.nrsc.gov.in/api/v1/catalog/search returned 404 on 2026-09-06 — Bhoonidhi has no documented open REST API; use the bhoonidhi-downloader CLI instead.
+  // Serving a fixture until a working endpoint is found.
+  fixtureOnly: true,
 
   async fetchData() {
     // Bhoonidhi API catalog search

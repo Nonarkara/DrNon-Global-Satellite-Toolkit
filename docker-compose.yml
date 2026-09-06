@@ -1,0 +1,28 @@
+# Full local stack: the dashboard plus its own tile server, so nothing
+# depends on the public titiler.xyz demo.
+#
+#   docker compose up
+
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      # Point the app at the tiler in this compose network.
+      NEXT_PUBLIC_TITILER_URL: http://localhost:8000
+    env_file:
+      - path: .env
+        required: false
+    depends_on:
+      - tiler
+
+  tiler:
+    image: ghcr.io/developmentseed/titiler:latest
+    ports:
+      - "8000:8000"
+    environment:
+      # Sentinel-2 and Landsat COGs on AWS are anonymously readable.
+      AWS_NO_SIGN_REQUEST: "YES"
+      GDAL_DISABLE_READDIR_ON_OPEN: EMPTY_DIR
+      CPL_VSIL_CURL_ALLOWED_EXTENSIONS: ".tif,.TIF,.tiff"

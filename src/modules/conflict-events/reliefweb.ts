@@ -15,15 +15,29 @@ export const reliefweb: ModuleDefinition<ReliefWebReport[]> = {
   label: "ReliefWeb Disasters",
   category: "conflict-events",
   description:
-    "Humanitarian disaster reports, situation updates, and emergency response data from ReliefWeb/OCHA.",
-  pollInterval: 600,
+    "Humanitarian disaster reports from ReliefWeb / UN OCHA. The v1 API is decommissioned and v2 requires an OCHA-approved appname — request one, then set RELIEFWEB_APPNAME.",
+  pollInterval: 3600,
   uiType: "feed",
+  sourceId: "reliefweb",
+  requiredEnvVars: ["RELIEFWEB_APPNAME"],
 
   async fetchData() {
+    // v1 returns HTTP 410 (decommissioned). v2 rejects any appname that OCHA
+    // has not approved, so an arbitrary string will not work.
+    const appname = process.env.RELIEFWEB_APPNAME;
+    if (!appname) {
+      throw new Error(
+        "RELIEFWEB_APPNAME not set — request an approved appname at https://reliefweb.int/help/api (human review required)",
+      );
+    }
+
     const url =
-      "https://api.reliefweb.int/v1/reports?appname=satellite-toolkit&filter[field]=country.name&filter[value]=Thailand&limit=25&sort[]=date:desc&fields[include][]=title&fields[include][]=date.original&fields[include][]=source.name&fields[include][]=country.name&fields[include][]=url_alias&fields[include][]=status";
-    const res = await fetch(url, { signal: AbortSignal.timeout(10000) });
-    if (!res.ok) throw new Error(`ReliefWeb: ${res.status}`);
+      `https://api.reliefweb.int/v2/reports?appname=${encodeURIComponent(appname)}` +
+      "&filter[field]=country.name&filter[value]=Thailand&limit=25&sort[]=date:desc" +
+      "&fields[include][]=title&fields[include][]=date.original&fields[include][]=source.name" +
+      "&fields[include][]=country.name&fields[include][]=url_alias&fields[include][]=status";
+    const res = await fetch(url, { signal: AbortSignal.timeout(15_000) });
+    if (!res.ok) throw new Error(`ReliefWeb v2: ${res.status}`);
     const json = (await res.json()) as {
       data?: Array<{
         id: number;

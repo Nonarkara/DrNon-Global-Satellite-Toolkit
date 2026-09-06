@@ -18,6 +18,17 @@ export async function GET(
   const fetchedAt = new Date().toISOString();
   const meta = toMetadata(mod);
 
+  // Fixture-only modules have no upstream to call — serve the fixture and
+  // label it honestly rather than attempting a fetch that always fails.
+  if (mod.fixtureOnly) {
+    return NextResponse.json({
+      data: mod.mockData,
+      tier: "mock" as const,
+      fetchedAt,
+      module: meta,
+    });
+  }
+
   try {
     const data = await mod.fetchData();
     return NextResponse.json({

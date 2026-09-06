@@ -19,6 +19,9 @@ export const highwayCameras: ModuleDefinition<HighwayCamera[]> = {
     "Real-time highway CCTV camera feeds, speed data, and traffic flow for Thailand's major highways.",
   pollInterval: 300,
   uiType: "table",
+  // Upstream unavailable: its.doh.go.th/api/cctv/list did not resolve on 2026-09-06 — the Department of Highways endpoint is unreachable from outside Thailand.
+  // Serving a fixture until a working endpoint is found.
+  fixtureOnly: true,
   tableColumns: [
     { key: "name", label: "Camera" },
     { key: "route", label: "Route" },
