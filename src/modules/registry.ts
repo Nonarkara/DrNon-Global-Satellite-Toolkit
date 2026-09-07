@@ -13,10 +13,16 @@ import type {
 // Earth Observation
 import { nasaFirms } from "./earth-observation/nasa-firms";
 import { nasaGibs } from "./earth-observation/nasa-gibs";
+import { nasaPower } from "./earth-observation/nasa-power";
+import { nasaSmap } from "./earth-observation/nasa-smap";
 import { sentinelHub } from "./earth-observation/sentinel-hub";
+import { copernicusCdse } from "./earth-observation/copernicus-cdse";
 import { isroBhoonidhi } from "./earth-observation/isro-bhoonidhi";
 import { jaxaTellus } from "./earth-observation/jaxa-tellus";
+import { jaxaGsmap } from "./earth-observation/jaxa-gsmap";
 import { gk2aKorea } from "./earth-observation/gk2a-korea";
+import { gistdaGateway } from "./earth-observation/gistda-gateway";
+import { gistdaGflood } from "./earth-observation/gistda-gflood";
 
 // Orbital & Air Traffic
 import { openSkyNetwork } from "./orbital-air-traffic/opensky-network";
@@ -33,6 +39,7 @@ import { predicthq } from "./conflict-events/predicthq";
 
 // Environmental
 import { openMeteoAqi } from "./environmental/open-meteo-aqi";
+import { openMeteoForecast } from "./environmental/open-meteo-forecast";
 import { openaq } from "./environmental/openaq";
 import { aqicnThailand } from "./environmental/aqicn-thailand";
 import { tmdWeather } from "./environmental/tmd-weather";
@@ -57,10 +64,16 @@ const ALL_MODULES: ModuleDefinition[] = [
   // Earth Observation
   nasaFirms,
   nasaGibs,
+  nasaPower,
+  nasaSmap,
   sentinelHub,
+  copernicusCdse,
   isroBhoonidhi,
   jaxaTellus,
+  jaxaGsmap,
   gk2aKorea,
+  gistdaGateway,
+  gistdaGflood,
   // Orbital & Air Traffic
   openSkyNetwork,
   celestrak,
@@ -74,6 +87,7 @@ const ALL_MODULES: ModuleDefinition[] = [
   predicthq,
   // Environmental
   openMeteoAqi,
+  openMeteoForecast,
   openaq,
   aqicnThailand,
   tmdWeather,
