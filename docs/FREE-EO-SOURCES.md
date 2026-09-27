@@ -1,6 +1,6 @@
 # Free Earth Observation sources for Thai civic disaster dashboards
 
-Catalog of **public, documented** EO and weather endpoints this toolkit can use without inventing APIs. Last verified **2026-09-02**.
+Catalog of **public, documented** EO and weather endpoints this toolkit can use without inventing APIs. Last verified **2026-09-27** (spot-check of the civic flood path, GIBS, FIRMS signup, GSMaP, Himawari, CDSE, POWER, Open-Meteo). Path list is unchanged from the 2026-09-02 inventory.
 
 This is for municipal / civic dashboards (flood, fire, drought, storm context) — not a substitute for official Thai warning services (TMD, DDPM). Always show **who produced the layer** and whether the value is **measured** or **modelled**.
 
@@ -57,13 +57,15 @@ flowchart TB
 
 | Resource | What it is | Access | Evidence class | Attribution / docs |
 |----------|------------|--------|----------------|--------------------|
-| **GIBS WMTS** | Daily browse tiles (VIIRS, MODIS, IMERG, …) | No key. `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/{layer}/default/{date}/GoogleMapsCompatible_Level{z}/{z}/{y}/{x}.{format}` | Browse imagery of satellite measurements (not analysis-ready HDF) | [GIBS API docs](https://nasa-gibs.github.io/gibs-api-docs/) |
-| **FIRMS** | Thermal hotspot CSV/API | Free map key: [FIRMS realtime API](https://firms.modaps.eosdis.nasa.gov/api/config/realtime/) | Satellite thermal detections (not confirmed ground fires) | NASA FIRMS |
+| **GIBS WMTS** | Daily browse tiles (VIIRS, MODIS, IMERG, …) | No key. `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/{layer}/default/{date}/GoogleMapsCompatible_Level{maxZoom}/{z}/{y}/{x}.{format}` | Browse imagery of satellite measurements (not analysis-ready HDF) | [GIBS API docs](https://nasa-gibs.github.io/gibs-api-docs/) |
+| **FIRMS** | Thermal hotspot CSV/API | Free map key: [FIRMS MAP_KEY signup](https://firms.modaps.eosdis.nasa.gov/api/map_key/). Country CSV shape: `/api/country/csv/{MAP_KEY}/{SOURCE}/{COUNTRY}/{DAYS}` (current NRT id `VIIRS_SNPP_NRT`, from `/api/data_availability`) | Satellite thermal detections (not confirmed ground fires) | NASA FIRMS |
 | **POWER Daily API** | Point climate ARD (T2M, precip, solar, …) | No key. `https://power.larc.nasa.gov/api/temporal/daily/point` | **Modelled** GEOS fields (~0.5° met) | [POWER](https://power.larc.nasa.gov/) · [Daily API](https://power.larc.nasa.gov/docs/services/api/temporal/daily/) · CC BY 4.0 |
 | **SMAP** | Soil moisture | Science granules: [NSIDC SMAP](https://nsidc.org/data/smap) (Earthdata login). Browse: GIBS layers `SMAP_L4_Analyzed_Surface_Soil_Moisture`, `SMAP_L4_Analyzed_Root_Zone_Soil_Moisture` | **L4 = modelled analysis** (SMAP observations + land model). L3 is closer to the radiometer but coarser | [GIBS SMAP announcement](https://www.earthdata.nasa.gov/news/blog/16-new-smap-products-now-available) · [SPL4SMAU v8](https://nsidc.org/data/spl4smau/versions/8) |
 | **CMR STAC** | NASA catalog search | `https://cmr.earthdata.nasa.gov/stac` | Metadata only | [CMR STAC](https://cmr.earthdata.nasa.gov/stac/docs/index.html) |
 
 POWER is **not** SMAP. Do not request soil moisture from POWER.
+
+`GoogleMapsCompatible_Level{maxZoom}` is the layer’s published tile-matrix set, not the current zoom. On 2026-09-27, VIIRS true color (`…/GoogleMapsCompatible_Level9/2/1/1.jpg`) and SMAP L4 / IMERG (`…/GoogleMapsCompatible_Level6/…png`) returned image bytes. Asking VIIRS true color for `GoogleMapsCompatible_Level6` returns `TILEMATRIXSET is invalid for LAYER`. The old FIRMS signup URL `https://firms.modaps.eosdis.nasa.gov/api/config/realtime/` returned `Invalid API call`; the signup form is `/api/map_key/`. `/api/data_availability` lists `VIIRS_SNPP_NRT` (and `MODIS_NRT`, `VIIRS_NOAA20_NRT`, `VIIRS_NOAA21_NRT`). Bare `VIIRS_SNPP` is not a current `data_id`. This template’s `nasa-firms` panel still mocks because `/api/fires` is not shipped.
 
 ---
 
@@ -150,6 +152,14 @@ Respect OSM tile usage policy; do not hammer `tile.openstreetmap.org` from a hig
 - Air quality is a **separate** site: https://air.gistda.or.th
 
 Unauthenticated calls to the gateway return **HTTP 407 Authentication Required** (the paths exist). Node/undici throws on 407, so the modules probe with a placeholder `api_key` and expect **401 INVALID_API_KEY** until a real `GISTDA_API_KEY` is set.
+
+Re-checked **2026-09-27** with `api_key=unconfigured` (no real key, no FloodDash, no `/app-api/proxy`):
+
+| Check | Result |
+|-------|--------|
+| Open API manual, key portal `/v2`, STAC UI, flood download page | HTTP 200 |
+| `/features/flood/1day`, `/features/flood-freq`, `/maps/flood/1day/wms`, `/maps/flood/1day/tms/6/50/30` | HTTP 401 `{"code":"INVALID_API_KEY"}` — paths still exist |
+| GFlood folder JSON + WMS GetCapabilities | HTTP 200. WMS still names `rain_30min.tif`, `FloodArea_Poly`, `flood_prediction_union`. WMTS layer is still `Flood_Y2011` (2011 footprint, not live water) |
 
 **Do not treat `/app-api/proxy/...` as a public API.** Those are authenticated Disaster Platform app internals (session cookies). Civic dashboards must use the Open API gateway only. Knowledge nav has **no** separate developer-docs URL beyond the Swagger manual above.
 

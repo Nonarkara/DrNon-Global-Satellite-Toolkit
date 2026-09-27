@@ -69,19 +69,34 @@ Module panels → labels → distance grid → analytic overlays → satellite i
 
 ## How to run / fork
 
-Honest path — this repo, no invented endpoints:
+Flood-season path. **Node.js 22.** No API key is required to see the dashboard. Every module ships mock data, so a missing key or a down feed does not blank the screen.
 
 ```bash
 git clone https://github.com/Nonarkara/DrNon-Global-Satellite-Toolkit.git
 cd DrNon-Global-Satellite-Toolkit
 npm install
 npm run dev
-# Open http://localhost:3000
 ```
 
-No API keys are required to start. Every module ships mock data. For live GISTDA GeoJSON and tiles, copy [`.env.example`](.env.example) to `.env.local` and set **only the env name** `GISTDA_API_KEY` (register your own key; never commit it). Optional names for other sources (`FIRMS_KEY`, and so on) are listed in `.env.example`.
+Open http://localhost:3000 and click **Modules**. For Thai flood context, enable these two first:
 
-Then enable modules in the UI: NASA FIRMS, GISTDA Gateway, GISTDA GFlood, JAXA GSMaP, Copernicus CDSE, Open-Meteo Forecast, ReliefWeb. Fork, change the map center, add a file under `src/modules/`, register it in `src/modules/registry.ts`.
+1. **GISTDA GFlood OGC Tiles** (`gistda-gflood`) — priority 1 live flood tiles. Path: `/maps/flood/{1day,3days,7days,30days}/{wms|wmts|tms/{z}/{x}/{y}}`. Example TMS: `https://api-gateway.gistda.or.th/api/2.0/resources/maps/flood/1day/tms/{z}/{x}/{y}` with your `api_key`.
+2. **GISTDA Disaster Gateway** (`gistda-gateway`) — priority 2 flood features: `/features/flood/{1day,3days,7days,30days}` and `/features/flood-freq` (historical frequency, not live water).
+
+Both use only the published Open API at `https://api-gateway.gistda.or.th/api/2.0/resources`. Checked 2026-09-27: those paths answer **401 `INVALID_API_KEY`** when the key is missing, which means the route exists. The panels stay on catalog or mock until you set a key. This toolkit is **not** an official GISTDA product and **not** a TMD or DDPM warning.
+
+```bash
+cp .env.example .env.local
+# Set GISTDA_API_KEY only. Register at https://api-gateway.gistda.or.th/v2
+# Manual: https://disaster.gistda.or.th/services/open-api
+# Never commit the key. Do not scrape FloodDash or /app-api/proxy.
+```
+
+Restart `npm run dev` after saving `.env.local`.
+
+Beside the flood layers, still mock-safe: **JAXA GSMaP + Himawari** (satellite-estimated rain, not a gauge), **Open-Meteo Forecast** (modelled NWP, not TMD), **Copernicus CDSE**, **ReliefWeb**. **NASA FIRMS Fire Detection** wraps `/api/fires`, which this template does not ship, so that panel stays on mock until you add the route. Request a FIRMS map key at https://firms.modaps.eosdis.nasa.gov/api/map_key/ and store it as `FIRMS_KEY` (the old `/api/config/realtime/` URL now returns `Invalid API call`).
+
+Fork, change the map center, copy `src/modules/_template.ts`, then add **one import and one `ALL_MODULES` entry** in `src/modules/registry.ts`. GitHub Actions (`.github/workflows/ci.yml`) runs `npm ci`, lint, and build on Node 22.
 
 ## License
 
@@ -369,14 +384,13 @@ This toolkit is designed to be a **starting point, not a finished product**. The
 git clone https://github.com/Nonarkara/DrNon-Global-Satellite-Toolkit.git my-disaster-dashboard
 cd my-disaster-dashboard
 npm install
-
-# Set your FIRMS key for live fire data
-echo "FIRMS_KEY=your_key_here" > .env.local
-
+cp .env.example .env.local
+# Edit .env.local: set GISTDA_API_KEY (register at api-gateway.gistda.or.th/v2).
+# Leave the value empty to stay on mock. Do not commit the file.
 npm run dev
 ```
 
-Enable these modules in the UI: **NASA FIRMS** + **GISTDA Gateway** + **GISTDA GFlood** + **JAXA GSMaP + Himawari** + **Copernicus CDSE** + **Open-Meteo Forecast** + **ReliefWeb**. Add `GISTDA_API_KEY` to fetch live Open API GeoJSON (`/features/flood|viirs|burn-*`) and tiles (`/maps/flood|viirs|dri|ndwi|smap`). You now have fire detection, Thai flood/fire/drought products, estimated rainfall, Sentinel catalog, modelled weather, and humanitarian alerts — with mock fallbacks if keys are missing.
+Enable these modules in the UI: **GISTDA GFlood OGC Tiles** + **GISTDA Disaster Gateway** + **JAXA GSMaP + Himawari** + **Copernicus CDSE** + **Open-Meteo Forecast** + **ReliefWeb**. `GISTDA_API_KEY` fetches live Open API GeoJSON (`/features/flood|viirs|burn-*`) and tiles (`/maps/flood|viirs|dri|ndwi|smap`). **NASA FIRMS** stays on mock in this template (`/api/fires` is not included). You get Thai flood/fire/drought products, estimated rainfall, a Sentinel catalog, modelled weather, and humanitarian alerts — with mock fallbacks if keys are missing.
 
 Free-EO catalog (real URLs, measured vs modelled, GISTDA attribution, Earth Engine licence): [`docs/FREE-EO-SOURCES.md`](docs/FREE-EO-SOURCES.md).
 
@@ -405,7 +419,7 @@ Fill in 5 things:
 4. **`fetchData()`** — the published API call (or computation). Do not scrape `/app-api/proxy` or private dashboards.
 5. **`mockData`** — realistic fallback data (same schema as live)
 
-Add one import line to `src/modules/registry.ts`. Done. It appears in the module selector, gets a dynamic API route, and the React hook can consume it.
+Add one import and one `ALL_MODULES` entry in `src/modules/registry.ts` (see the header comment in `src/modules/_template.ts`). Done. It appears in the module selector, gets a dynamic API route, and the React hook can consume it.
 
 ---
 
@@ -476,7 +490,7 @@ All optional — the system works without any keys using mock data and free base
 
 ```bash
 # Satellite data
-FIRMS_KEY=                          # NASA FIRMS thermal detection (free)
+FIRMS_KEY=                          # NASA FIRMS MAP_KEY (https://firms.modaps.eosdis.nasa.gov/api/map_key/). Panel mocks until /api/fires exists.
 
 # Module API keys (all optional — mock data used when absent)
 ACLED_KEY=                          # Armed conflict data

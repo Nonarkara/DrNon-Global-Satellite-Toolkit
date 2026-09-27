@@ -188,7 +188,7 @@ export const popularApis: SatelliteApi[] = [
     country: "US",
     rootUrl: "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best",
     endpoints: [
-      { path: "/{layer}/default/{date}/GoogleMapsCompatible_Level{z}/{z}/{y}/{x}.{format}", description: "WMTS tile endpoint — 1,000+ layers" },
+      { path: "/{layer}/default/{date}/GoogleMapsCompatible_Level{maxZoom}/{z}/{y}/{x}.{format}", description: "WMTS tile. Level{maxZoom} is the layer's published matrix (VIIRS true color Level9, SMAP L4 and IMERG Level6) — not the current zoom. Zoom is the {z} after it." },
       { path: "/1.0.0/WMTSCapabilities.xml", description: "WMTS capabilities document" },
     ],
     protocol: "WMTS",
