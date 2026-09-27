@@ -24,7 +24,7 @@ export const activeProviders: SatelliteProviderDescriptor[] = [
       "Aerosol optical depth",
     ],
     endpoints: [
-      "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/{layer}/default/{date}/GoogleMapsCompatible_Level{z}/{z}/{y}/{x}.{format}",
+      "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/{layer}/default/{date}/GoogleMapsCompatible_Level{maxZoom}/{z}/{y}/{x}.{format}",
     ],
   },
   {
@@ -56,7 +56,7 @@ export const activeProviders: SatelliteProviderDescriptor[] = [
       "Fire Information for Resource Management System. Provides VIIRS and MODIS thermal hotspot detections.",
     surfaces: ["Thermal hotspots", "Fire detection"],
     endpoints: [
-      "https://firms.modaps.eosdis.nasa.gov/api/country/csv/{key}/VIIRS_SNPP/{country}/{days}",
+      "https://firms.modaps.eosdis.nasa.gov/api/country/csv/{key}/VIIRS_SNPP_NRT/{country}/{days}",
     ],
   },
   {

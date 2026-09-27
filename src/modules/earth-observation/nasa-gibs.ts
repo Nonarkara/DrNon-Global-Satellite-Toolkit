@@ -15,7 +15,7 @@ export const nasaGibs: ModuleDefinition<GibsLayer[]> = {
   label: "NASA GIBS Imagery",
   category: "earth-observation",
   description:
-    "NASA Global Imagery Browse Services — VIIRS True Color, MODIS False Color, and Blue Marble satellite imagery tiles.",
+    "NASA GIBS browse tiles (VIIRS, MODIS, Blue Marble). This template does not ship /api/map/overlays, so the panel stays on mock data; tile URLs are built in the overlay catalog and map engine.",
   pollInterval: 0,
   uiType: "table",
   wrapsExisting: "/api/map/overlays",

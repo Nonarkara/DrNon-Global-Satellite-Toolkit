@@ -14,7 +14,7 @@ export const nasaFirms: ModuleDefinition<FireEvent[]> = {
   label: "NASA FIRMS Fire Detection",
   category: "earth-observation",
   description:
-    "Near-real-time fire detection from NASA VIIRS/MODIS satellite sensors across Southeast Asia.",
+    "NASA VIIRS/MODIS thermal hotspots. This template does not ship /api/fires, so the panel stays on mock data until that route exists. A MAP_KEY belongs in FIRMS_KEY (https://firms.modaps.eosdis.nasa.gov/api/map_key/). Detections are not confirmed ground fires.",
   pollInterval: 120,
   uiType: "table",
   wrapsExisting: "/api/fires",

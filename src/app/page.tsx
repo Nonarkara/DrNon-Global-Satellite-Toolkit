@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-import { Layers, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Layers } from "lucide-react";
 import type {
   ModuleCatalogResponse,
   ModuleCategory,

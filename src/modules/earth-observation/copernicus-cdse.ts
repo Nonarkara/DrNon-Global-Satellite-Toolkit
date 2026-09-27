@@ -86,7 +86,6 @@ export const copernicusCdse: ModuleDefinition<CdseScene[]> = {
     ]);
 
     const s2Meta = s2.map((f) => toMeta(f, "Sentinel-2 L2A"));
-    const s1Meta = s1.map((f) => toMeta(f, "Sentinel-1 GRD"));
     const bestS2 = selectBestImage(s2Meta, { maxAgeDays: 10, maxCloudCover: 40 });
 
     const rows: CdseScene[] = [];

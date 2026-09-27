@@ -10,7 +10,7 @@ Usage:
 
 Environment variables:
     DATABASE_URL   — PostgreSQL connection string
-    FIRMS_KEY      — NASA FIRMS API key (get one at https://firms.modaps.eosdis.nasa.gov/api/config/realtime/)
+    FIRMS_KEY      — NASA FIRMS MAP_KEY (https://firms.modaps.eosdis.nasa.gov/api/map_key/)
 
 The script falls back to mock data when FIRMS_KEY is not configured,
 so you can test the ingestion pipeline without credentials.
@@ -32,10 +32,11 @@ FIRMS_KEY = os.getenv("FIRMS_KEY", "your_firms_key_here")
 
 
 def fetch_firms_data(country_code="THA", days=1):
-    """Fetch fire data from NASA FIRMS (VIIRS SNPP)."""
+    """Fetch fire data from NASA FIRMS (VIIRS SNPP NRT)."""
+    # data_availability (2026-09-27) lists VIIRS_SNPP_NRT, not bare VIIRS_SNPP.
     url = (
         f"https://firms.modaps.eosdis.nasa.gov/api/country/csv/"
-        f"{FIRMS_KEY}/VIIRS_SNPP/{country_code}/{days}"
+        f"{FIRMS_KEY}/VIIRS_SNPP_NRT/{country_code}/{days}"
     )
 
     if FIRMS_KEY == "your_firms_key_here":
