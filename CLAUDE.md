@@ -46,7 +46,9 @@ src/
 │       ├── modules/catalog/route.ts      # GET → all module metadata
 │       ├── modules/[id]/route.ts         # GET → module data (live or mock fallback)
 │       ├── stac/search/route.ts          # GET → scenes with ready tile URLs
+│       ├── stac/indices/route.ts         # GET → NDVI/NDWI/… render + statistics
 │       ├── stac/collections/route.ts     # GET → backends / collections
+│       ├── orbital/overpass/route.ts     # GET → next satellite passes
 │       └── sources/route.ts              # GET → the curated source registry as JSON
 ├── modules/
 │   ├── registry.ts                       # Central index — add/remove modules here
@@ -70,7 +72,14 @@ src/
 ├── stac/                                 # STAC client — the imagery framework
 │   ├── backends.ts                       #   4 verified endpoints
 │   ├── client.ts                         #   searchStac / listCollections / signAssetHref
+│   ├── collections.ts                    #   9 probed collections: optical, SAR, DEM, land cover
+│   ├── indices.ts                        #   8 spectral indices + per-collection band aliases
+│   ├── index-render.ts                   #   index → tile / preview / statistics URLs
 │   └── preview.ts                        #   STAC item → XYZ tile URLs via TiTiler
+├── orbital/                              # Overpass prediction
+│   ├── tle.ts                            #   CelesTrak elements, serialised + 6 h cache
+│   ├── solar.ts                          #   NOAA solar elevation — is the pass imageable?
+│   └── overpass.ts                       #   SGP4 propagation, swath + illumination aware
 ├── engine/cog-layer.ts                   # Deck.gl layers for STAC/COG imagery
 ├── engine/map-engine.ts                  # Deck.gl layer factories (GIBS, MODIS, VIIRS, fire)
 ├── overlays/map-overlays.ts              # 10 satellite overlay definitions
@@ -215,6 +224,34 @@ npm run probe -- --json  # machine-readable
 
 Adding a source means adding a `DataSource` entry in `src/sources/` **and** a
 probe case in `scripts/probe-sources.mjs`, then `npm run docs:sources`.
+
+## MCP server
+
+`mcp/server.mjs` exposes the toolkit to any agent runtime:
+
+```bash
+claude mcp add satellite -- node /abs/path/to/mcp/server.mjs
+```
+
+| Tool | Needs a running app? |
+|---|---|
+| `search_imagery` | No — calls STAC directly |
+| `spectral_index` | No — calls STAC + tiler directly |
+| `next_overpass` | Yes (`npm run dev`) — orbital propagation lives in the app |
+| `list_data_sources` | Yes — reads `/api/sources` |
+
+## Verified rendering constraints
+
+Established by probing, not assumed. Changing any of these breaks rendering:
+
+- Band math uses **positional `b1`/`b2`** with `asset_as_band=true`, ordered by
+  the `assets` parameters. Asset names in an expression return HTTP 400.
+- **Only `earth-search` + Sentinel-2** supports band math on a public tiler.
+  Planetary Computer needs SAS signing (409), Earth Search's Landsat is
+  requester-pays (AccessDenied), CDSE serves `s3://` URIs.
+- Landsat's near-infrared band is **`nir08`**, not `nir` — see `resolveAssets()`.
+- CelesTrak **403s `GROUP=active`** and 500s on concurrent requests; `tle.ts`
+  serialises and caches for 6 hours.
 
 ## React Integration
 

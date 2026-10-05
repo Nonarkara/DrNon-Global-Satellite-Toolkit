@@ -4,9 +4,21 @@ Instructions for AI coding agents working on this repository. Follows the
 [agents.md](https://agents.md) spec and is consumed by Claude Code, Codex,
 Cursor, Aider, Gemini CLI and other agent runtimes.
 
-**If you are an agent that has just been pointed at this repo, read this file
-first, then run `npm run probe`. That single command tells you which of the 38
-catalogued data sources are alive right now.**
+**If you are an agent that has just been pointed at this repo: read this file,
+then run `npm run probe`. That one command tells you which of the 39 catalogued
+data sources are alive right now.**
+
+**Or skip the codebase entirely** — this repo ships an MCP server:
+
+```bash
+claude mcp add satellite -- node /abs/path/to/mcp/server.mjs
+```
+
+Four tools, no API key: `search_imagery`, `spectral_index` (NDVI/NDWI/NBR with
+real pixel statistics), `next_overpass`, `list_data_sources`. `search_imagery`
+and `spectral_index` are fully standalone; `next_overpass` and
+`list_data_sources` call a running instance (`npm run dev`) for orbital
+propagation and the source registry.
 
 ## The 60-second orientation
 
@@ -40,6 +52,10 @@ Verified end-to-end on 2026-09-06 over Bangkok.
 |---|---|
 | Know which data source to use | `src/sources/` → rendered as `docs/data-sources.md` |
 | Search satellite imagery | `src/stac/` (`client.ts`, `backends.ts`, `preview.ts`) |
+| Know which collection to search | `src/stac/collections.ts` |
+| Compute NDVI/NDWI/NBR | `src/stac/indices.ts`, `src/stac/index-render.ts` |
+| Predict a satellite overpass | `src/orbital/` (`tle.ts`, `solar.ts`, `overpass.ts`) |
+| Expose it all to an agent | `mcp/server.mjs` |
 | Render imagery on a map | `src/engine/cog-layer.ts`, `src/engine/map-engine.ts` |
 | Add or edit a data feed | `src/modules/` + `src/modules/registry.ts` |
 | Add an API route | `src/app/api/` |
@@ -91,7 +107,25 @@ a React component — keys leak and CORS breaks.
 All colour comes from CSS custom properties in `src/app/globals.css`
 (`--bg`, `--ink`, `--cool`, `--danger`, `--line`, …). No raw hex.
 
-### 7. Regenerate docs, don't hand-edit them
+### 7. Respect the verified rendering constraints
+
+These cost real debugging to establish. Do not "simplify" them away:
+
+- **Band math uses positional `b1`, `b2` naming**, with `asset_as_band=true`,
+  in the order the `assets` parameters appear. Asset names in an expression
+  (`(nir-red)/(nir+red)`) return HTTP 400 "Invalid expression".
+- **Only `earth-search` + Sentinel-2 supports band math on a public tiler.**
+  Planetary Computer assets need SAS signing a public tiler cannot do (409);
+  Earth Search's Landsat is in the USGS requester-pays bucket (AccessDenied);
+  CDSE publishes `s3://` URIs that are not HTTP at all.
+- **Landsat calls near-infrared `nir08`, not `nir`.** `resolveAssets()` in
+  `src/stac/indices.ts` translates; new collections need an entry there.
+- **CelesTrak 403s the bulk `GROUP=active` feed** and 500s on concurrent
+  requests. `src/orbital/tle.ts` serialises and caches for 6 hours — leave it.
+- **Sentinel-2A alone repeats every 10 days**, so a short overpass horizon
+  legitimately returns nothing. The default is 240 hours for that reason.
+
+### 8. Regenerate docs, don't hand-edit them
 
 `docs/data-sources.md` is generated. Change `src/sources/`, then run
 `npm run docs:sources`.
@@ -100,7 +134,9 @@ All colour comes from CSS custom properties in `src/app/globals.css`
 
 ```bash
 npm run dev            # dev server on :3000
-npm run verify         # typecheck + lint + build — what CI runs
+npm run verify         # typecheck + lint + test + build — what CI runs
+npm test               # 47 tests, no network required
+npm run mcp            # the MCP server on stdio
 npm run probe          # probe keyless sources against the live internet
 npm run probe:all      # include sources needing credentials
 npm run probe -- --json  # machine-readable, for an agent to parse
@@ -111,8 +147,8 @@ make notebook          # + JupyterLab and leafmap
 docker compose up      # app plus a self-hosted TiTiler
 ```
 
-There is no unit-test runner. `npm run verify` passing plus `npm run probe`
-reporting all green is the bar.
+`npm run verify` passing plus `npm run probe` reporting all green is the bar.
+Tests are pure and offline; `npm run probe` is the network check.
 
 ## Task recipes
 

@@ -1,7 +1,7 @@
 {
   "name": "drnon-global-satellite-toolkit",
-  "version": "2.1.0",
-  "description": "Runnable dashboard template for satellite and global-awareness data \u2014 STAC imagery search, dynamic COG tiling, and 31 pluggable data modules on Deck.gl + Next.js",
+  "version": "2.2.0",
+  "description": "The open satellite toolkit \u2014 STAC imagery search across NASA/ESA/AWS archives, spectral indices (NDVI/NDWI/NBR), satellite overpass prediction, 38 verified data sources, and an MCP server. Zero API keys to start.",
   "author": "Dr Non Arkaraprasertkul <https://github.com/Nonarkara>",
   "license": "MIT",
   "homepage": "https://github.com/Nonarkara/DrNon-Global-Satellite-Toolkit",
@@ -29,7 +29,15 @@
     "copernicus",
     "landsat",
     "planetary-computer",
-    "open-data"
+    "open-data",
+    "ndvi",
+    "spectral-indices",
+    "sentinel-1",
+    "sar",
+    "mcp",
+    "mcp-server",
+    "overpass-prediction",
+    "band-math"
   ],
   "scripts": {
     "dev": "next dev",
@@ -39,14 +47,18 @@
     "typecheck": "tsc --noEmit",
     "probe": "node scripts/probe-sources.mjs",
     "probe:all": "node scripts/probe-sources.mjs --all",
-    "verify": "npm run typecheck && npm run lint && npm run build",
-    "docs:sources": "node scripts/generate-source-docs.mjs"
+    "verify": "npm run typecheck && npm run lint && npm run test && npm run build",
+    "docs:sources": "node scripts/generate-source-docs.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "mcp": "node mcp/server.mjs"
   },
   "dependencies": {
     "@deck.gl/core": "^9.2.11",
     "@deck.gl/geo-layers": "^9.2.11",
     "@deck.gl/layers": "^9.2.11",
     "@deck.gl/react": "^9.2.11",
+    "@modelcontextprotocol/sdk": "^1.32.0",
     "@tailwindcss/postcss": "^4",
     "clsx": "^2.1.1",
     "lucide-react": "^0.460.0",
@@ -54,6 +66,7 @@
     "postcss": "^8",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "satellite.js": "^7.1.0",
     "tailwindcss": "^4"
   },
   "devDependencies": {
@@ -63,7 +76,8 @@
     "@types/react-dom": "^19",
     "eslint": "^9.39.5",
     "eslint-config-next": "^15.5.25",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^5.0.3"
   },
   "engines": {
     "node": ">=20"

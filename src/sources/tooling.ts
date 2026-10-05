@@ -64,6 +64,34 @@ export const TOOLING: DataSource[] = [
     seeAlso: ["pystac-client", "rioxarray"],
   },
   {
+    id: "rioxarray",
+    name: "rioxarray",
+    agency: "corteva (open source)",
+    country: "GLOBAL",
+    kind: "library",
+    auth: "none",
+    tier: 1,
+    portal: "https://github.com/corteva/rioxarray",
+    docs: "https://corteva.github.io/rioxarray/stable/",
+    provides: [
+      "Geospatial extension for xarray — CRS, affine transform, nodata handling",
+      "Reprojection, clipping to geometry, and writing GeoTIFF/COG",
+    ],
+    verified: {
+      at: "2026-09-06",
+      status: "ok",
+      note: "★623, last push 2026-07-27. The standard way to get a georeferenced raster in and out of xarray.",
+    },
+    useWhen:
+      "You have an xarray cube from odc-stac and need to clip it to a boundary, reproject it, or write the result out as a COG.",
+    howTo:
+      "pip install rioxarray, then `ds.rio.write_crs(...)`, `ds.rio.clip(geometries)`, `ds.rio.reproject('EPSG:4326')`, `ds.rio.to_raster('out.tif', driver='COG')`. Already in ingestion/requirements.txt.",
+    gotchas: [
+      "The `.rio` accessor only appears after `import rioxarray` — importing xarray alone is not enough, which produces a confusing AttributeError.",
+    ],
+    seeAlso: ["odc-stac", "pystac-client"],
+  },
+  {
     id: "leafmap",
     name: "leafmap",
     agency: "opengeos (Qiusheng Wu)",

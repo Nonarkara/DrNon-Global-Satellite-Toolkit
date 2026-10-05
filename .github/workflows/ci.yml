@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   build:
-    name: Lint + Build
+    name: Lint + Test + Build
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -39,6 +39,9 @@ jobs:
 
       - name: Lint
         run: npm run lint
+
+      - name: Test
+        run: npm run test
 
       - name: Build
         run: npm run build

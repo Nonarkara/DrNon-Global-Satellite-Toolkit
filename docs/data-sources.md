@@ -3,7 +3,7 @@
 > **Generated from [`src/sources/`](../src/sources/). Do not edit by hand** —
 > run `npm run docs:sources` after changing the registry.
 
-Every source below was probed against the live internet. 38 entries; **21 need no credentials at all**. Re-verify at any time with `npm run probe`.
+Every source below was probed against the live internet. 39 entries; **22 need no credentials at all**. Re-verify at any time with `npm run probe`.
 
 ## At a glance
 
@@ -24,6 +24,7 @@ Every source below was probed against the live internet. 38 entries; **21 need n
 | [Open-Meteo Air Quality API](#open-meteo-air-quality-api) | 1 | rest-api | No credentials | 🟢 verified working |
 | [OpenSky Network](#opensky-network) | 1 | rest-api | Free account | 🟢 verified working |
 | [pystac-client](#pystac-client) | 1 | library | No credentials | 🟢 verified working |
+| [rioxarray](#rioxarray) | 1 | library | No credentials | 🟢 verified working |
 | [TiTiler (public demo instance)](#titiler-public-demo-instance) | 1 | tile-service | No credentials | 🟢 verified working |
 | [TiTiler (self-hosted)](#titiler-self-hosted) | 1 | library | No credentials | 🟢 verified working |
 | [ASF Vertex Search API (Alaska Satellite Facility)](#asf-vertex-search-api-alaska-satellite-facility) | 2 | rest-api | Free account | 🟢 verified working |
@@ -499,6 +500,30 @@ Keyless, global, stable and actively maintained. Everything in this tier works f
 <sub>Last probed 2026-09-06 — ★207, last push 2026-08-31. The de-facto standard STAC client; used by every serious EO pipeline.</sub>
 
 <sub>See also: `odc-stac`, `earth-search`</sub>
+
+#### rioxarray
+
+`rioxarray` · corteva (open source) · GLOBAL · **No credentials** · 🟢 verified working
+
+**Use when:** You have an xarray cube from odc-stac and need to clip it to a boundary, reproject it, or write the result out as a COG.
+
+**Provides**
+- Geospatial extension for xarray — CRS, affine transform, nodata handling
+- Reprojection, clipping to geometry, and writing GeoTIFF/COG
+
+| | |
+|---|---|
+| Portal | https://github.com/corteva/rioxarray |
+| Docs | https://corteva.github.io/rioxarray/stable/ |
+
+**How to use it.** pip install rioxarray, then `ds.rio.write_crs(...)`, `ds.rio.clip(geometries)`, `ds.rio.reproject('EPSG:4326')`, `ds.rio.to_raster('out.tif', driver='COG')`. Already in ingestion/requirements.txt.
+
+**Gotchas**
+- The `.rio` accessor only appears after `import rioxarray` — importing xarray alone is not enough, which produces a confusing AttributeError.
+
+<sub>Last probed 2026-09-06 — ★623, last push 2026-07-27. The standard way to get a georeferenced raster in and out of xarray.</sub>
+
+<sub>See also: `odc-stac`, `pystac-client`</sub>
 
 #### TiTiler (public demo instance)
 
@@ -1136,4 +1161,4 @@ Deprecated, decommissioned or gated behind human approval. Listed because tutori
 
 ---
 
-<sub>Generated 2026-09-06 from `src/sources/`. Verification statuses reflect the last run of `npm run probe`.</sub>
+<sub>Generated 2026-10-05 from `src/sources/`. Verification statuses reflect the last run of `npm run probe`.</sub>

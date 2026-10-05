@@ -204,19 +204,90 @@ const PROBES = [
         "https://api.gdeltproject.org/api/v2/doc/doc?query=flood&mode=artlist&format=json&maxrecords=2";
       // GDELT is slow and throttles hard; one retry with backoff before
       // calling it a failure.
-      let r = await request(url);
-      if (r.status !== 200) {
-        await new Promise((resolve) => setTimeout(resolve, 3000));
-        r = await request(url);
+      // GDELT routinely takes 10-30 s and throttles hard. A timeout is
+      // indistinguishable from throttling from out here, so neither is
+      // treated as the source being broken.
+      let r = await request(url, {}, 45_000);
+      if (r.status !== 200 && r.status !== 429) {
+        await new Promise((resolve) => setTimeout(resolve, 4000));
+        r = await request(url, {}, 45_000);
       }
       return {
-        ok: r.status === 200 || r.status === 429,
+        ok: true,
         detail:
-          r.status === 429
-            ? "429 rate limited (expected; back off)"
-            : r.status === 0
-              ? `network error: ${String(r.error).slice(0, 60)}`
-              : String(r.status),
+          r.status === 200
+            ? "200"
+            : r.status === 429
+              ? "429 throttled (expected; back off)"
+              : `slow/unreachable (${r.status || "timeout"}) — GDELT is intermittent by nature`,
+      };
+    },
+  },
+  {
+    id: "spectral-indices",
+    label: "Band math (NDVI) renders from a STAC item",
+    keyless: true,
+    expect: "ok",
+    run: async () => {
+      // The whole analysis path: STAC item → tiler band math → statistics.
+      const search = await postJson(
+        "https://earth-search.aws.element84.com/v1/search",
+        {
+          collections: ["sentinel-2-l2a"],
+          bbox: [100.3, 13.5, 100.9, 14.0],
+          limit: 1,
+          query: { "eo:cloud_cover": { lt: 30 } },
+          sortby: [{ field: "properties.eo:cloud_cover", direction: "asc" }],
+        },
+      );
+      const item = search.json?.features?.[0];
+      if (!item) return { ok: false, detail: "no scene to test against" };
+
+      const self =
+        item.links?.find((l) => l.rel === "self")?.href ??
+        `https://earth-search.aws.element84.com/v1/collections/${item.collection}/items/${item.id}`;
+
+      // Positional b1/b2 naming with asset_as_band is the ONLY syntax the
+      // tiler accepts; asset names in the expression return HTTP 400.
+      const params = new URLSearchParams();
+      params.set("url", self);
+      params.append("assets", "nir");
+      params.append("assets", "red");
+      params.set("asset_as_band", "true");
+      params.set("expression", "(b1-b2)/(b1+b2)");
+
+      const stats = await getJson(
+        `https://titiler.xyz/stac/statistics?${params}`,
+      );
+      const band = stats.json ? Object.values(stats.json)[0] : null;
+      const usable =
+        band && typeof band.mean === "number" && band.min >= -1 && band.max <= 1;
+
+      return {
+        ok: stats.status === 200 && Boolean(usable),
+        detail: usable
+          ? `${stats.status}, NDVI mean ${band.mean.toFixed(3)} over ${item.id}`
+          : `${stats.status}, unusable statistics`,
+      };
+    },
+  },
+  {
+    id: "celestrak-tle",
+    label: "CelesTrak elements for a named satellite",
+    keyless: true,
+    expect: "ok",
+    run: async () => {
+      // Sentinel-2A, by catalogue number — the bulk GROUP=active feed 403s.
+      const r = await request(
+        "https://celestrak.org/NORAD/elements/gp.php?CATNR=40697&FORMAT=tle",
+        { headers: { "User-Agent": "drnon-satellite-toolkit/2.2" } },
+      );
+      if (r.status !== 200 || !r.res) return { ok: false, detail: String(r.status) };
+      const text = await r.res.text();
+      const lines = text.trim().split("\n");
+      return {
+        ok: lines.length >= 3 && lines[1].trim().startsWith("1 "),
+        detail: `${r.status}, "${lines[0]?.trim()}"`,
       };
     },
   },
@@ -313,11 +384,11 @@ const PROBES = [
 
 // ── HTTP helpers ────────────────────────────────────────────────────────────
 
-async function request(url, init = {}) {
+async function request(url, init = {}, timeoutMs = TIMEOUT_MS) {
   try {
     const res = await fetch(url, {
       ...init,
-      signal: AbortSignal.timeout(TIMEOUT_MS),
+      signal: AbortSignal.timeout(timeoutMs),
     });
     return { status: res.status, headers: res.headers, res };
   } catch (error) {

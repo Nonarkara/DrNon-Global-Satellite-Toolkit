@@ -28,9 +28,71 @@ and Landsat archives, rendering real satellite imagery, **with no API key.**
 
 ```bash
 npm run probe   # verify every keyless source against the live internet
+npm test        # 47 tests, no network required
 ```
 
-[Full quick start ↓](#quick-start) · [Data source guide](docs/data-sources.md) · [For AI agents](AGENTS.md)
+[Full quick start ↓](#quick-start) · [Data sources](docs/data-sources.md) · [For AI agents](AGENTS.md)
+
+---
+
+## What you can do without a single API key
+
+| | |
+|---|---|
+| **Find imagery** | Search Sentinel-2, Landsat, Sentinel-1 SAR, DEMs and land cover across four STAC catalogs (NASA, ESA, AWS, Microsoft) |
+| **See it** | Any scene renders as map tiles through a dynamic COG tiler — no download, no preprocessing |
+| **Measure it** | Eight spectral indices (NDVI, NDWI, NDMI, NBR, NDBI, SAVI, NDSI) with real pixel statistics, not just pictures |
+| **Plan it** | Predict when a satellite will next fly over any point — accounting for instrument swath and whether the sun will be up |
+| **Know where to look** | 39 data sources, each probed live, tier-ranked, with the gotchas that waste an afternoon |
+| **Hand it to an agent** | A built-in MCP server exposes all of the above as tools for Claude Code, Codex or Cursor |
+
+### Measure, don't just look
+
+```bash
+curl "localhost:3000/api/stac/indices?index=ndvi&bbox=100.3,13.5,100.9,14.0"
+```
+
+Returns the least-cloudy recent scene, a rendered NDVI image, XYZ tiles, and a
+statistics endpoint giving real min/max/mean/median over the scene. The same
+machinery answers *how much* vegetation, *where* the water is, *how badly* it
+burned — rather than only showing you a picture of it.
+
+| Index | Question it answers |
+|---|---|
+| `ndvi` / `savi` | How much healthy vegetation is here? |
+| `ndwi` | Where is the open water? (flood extent) |
+| `ndmi` | Is the canopy drying out? (fire-season early warning) |
+| `nbr` | How badly did it burn? (difference two dates for dNBR) |
+| `ndbi` | Where is the built-up and impervious surface? |
+| `ndsi` | Where is the snow and ice? (and not cloud) |
+
+### Plan the next acquisition
+
+```bash
+curl "localhost:3000/api/orbital/overpass?lat=13.75&lon=100.5&imageableOnly=true"
+```
+
+```
+2026-10-09T03:38Z (10:38 ICT)  Landsat 9     sun 60.8°  12.9 km  → landsat-c2-l2
+2026-10-09T03:54Z (10:54 ICT)  Sentinel-2A   sun 63.8°  54.7 km  → sentinel-2-l2a
+2026-10-12T11:09Z (18:09 ICT)  Sentinel-1A   sun -3.0°  22.3 km  → sentinel-1-grd
+```
+
+SGP4 propagation of live CelesTrak elements. Optical passes in darkness are
+excluded; the Sentinel-1 twilight pass is kept, because radar carries its own
+illumination. Those local times are the real thing — Landsat and Sentinel-2 fly
+~10:30 sun-synchronous descending nodes, Sentinel-1 flies dawn-dusk.
+
+### Give it to an AI agent
+
+```bash
+claude mcp add satellite -- node /path/to/DrNon-Global-Satellite-Toolkit/mcp/server.mjs
+```
+
+Four tools, no API key: `search_imagery`, `spectral_index`, `next_overpass`,
+`list_data_sources`. The agent can then answer "show me how green the Mekong
+Delta was last month, and tell me when the next clear pass is" without being
+told anything about this codebase.
 
 ---
 
