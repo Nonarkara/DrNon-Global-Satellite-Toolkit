@@ -14,9 +14,14 @@ interface SceneRow {
 /** Bangkok. Change to retarget the module. */
 const BBOX: [number, number, number, number] = [100.3, 13.5, 100.9, 14.0];
 const COLLECTION = "sentinel-2-l2a";
-const MAX_CLOUD = 30;
+const MAX_CLOUD = 40;
 const LIMIT = 10;
-const LOOKBACK_DAYS = 60;
+/**
+ * Tropical monsoon regions can go two months without a clear scene — a
+ * 60-day window returned zero rows over Bangkok in October while reporting
+ * tier "live", which reads as a broken module rather than a cloudy sky.
+ */
+const LOOKBACK_DAYS = 120;
 
 function lookbackWindow(days: number): string {
   const end = new Date();

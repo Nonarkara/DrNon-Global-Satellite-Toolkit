@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "DrNon Global Satellite Toolkit",
   description:
-    "Dashboard template with 30 pluggable data-source modules, satellite imagery overlays, and global awareness APIs.",
+    "Dashboard template with pluggable data-source modules, satellite imagery overlays, and global awareness APIs.",
 };
 
 export default function RootLayout({

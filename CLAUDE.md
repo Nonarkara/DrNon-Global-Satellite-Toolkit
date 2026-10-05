@@ -14,10 +14,11 @@ npm run probe                  # verify every keyless data source is alive
 Then open **http://localhost:3000/imagery** — it searches real Sentinel-2 and
 Landsat scenes and renders them, with no API key.
 
-**Zero-config reality check.** Of 32 modules: **6 are live with no credentials**
-(`stac-imagery`, `nasa-gibs`, `opensky-network`, `celestrak`, `open-meteo-aqi`,
-`google-trends`), 14 need a key, and 12 are `fixtureOnly` because their upstream
-was probed dead on 2026-09-06. `/api/modules/<id>` reports `tier: "live" | "mock"`
+**Zero-config reality check.** Of 39 modules: **13 are live with no credentials**
+(`stac-imagery`, `nasa-gibs`, `nasa-power`, `nasa-smap`, `copernicus-cdse`,
+`jaxa-gsmap`, `gistda-gateway`, `gistda-gflood`, `opensky-network`, `celestrak`,
+`open-meteo-aqi`, `open-meteo-forecast`, `google-trends`), 14 need a key, and 12
+are `fixtureOnly` because their upstream was probed dead on 2026-09-06. `/api/modules/<id>` reports `tier: "live" | "mock"`
 honestly — never assume a module is live without checking.
 
 ## The imagery pipeline
@@ -58,7 +59,7 @@ src/
 │   │   ├── ModulePanel.tsx               # Renders any module by uiType
 │   │   ├── ModuleSelector.tsx            # Drawer to toggle modules on/off
 │   │   └── ModuleRail.tsx                # Tab bar for enabled modules
-│   ├── earth-observation/                # NASA FIRMS, GIBS, Sentinel, ISRO, JAXA, GK2A
+│   ├── earth-observation/                # NASA FIRMS, GIBS, POWER, SMAP, Sentinel Hub, CDSE, ISRO, JAXA, GK2A, GISTDA
 │   ├── orbital-air-traffic/              # OpenSky, CelesTrak, Space-Track, FlightLabs
 │   ├── conflict-events/                  # ACLED, GDELT, ReliefWeb, PredictHQ
 │   ├── environmental/                    # AQI, OpenAQ, AQICN, TMD, Meteoblue
@@ -118,10 +119,16 @@ Enable relevant modules in `src/modules/registry.ts` by keeping/removing entries
 - `stac-imagery` — Sentinel-2 scene search with tile URLs (no key) 🟢
 - `nasa-firms` — Fire detection, direct from the FIRMS API (needs FIRMS_KEY)
 - `nasa-gibs` — GIBS tile templates, built locally (no key) 🟢
+- `nasa-power` — NASA POWER daily climate (modelled GEOS fields, free)
+- `nasa-smap` — SMAP L4 soil-moisture GIBS browse (modelled analysis)
 - `sentinel-hub` — Processed Sentinel imagery (needs SENTINEL_HUB_KEY)
+- `copernicus-cdse` — Native CDSE STAC search for Sentinel-1 GRD + Sentinel-2 L2A (catalog public)
 - `isro-bhoonidhi` — ISRO 46-satellite archive
 - `jaxa-tellus` — JAXA Earth observation
+- `jaxa-gsmap` — JAXA GSMaP rainfall + Himawari browse freshness
 - `gk2a-korea` — GK2A geostationary weather
+- `gistda-gateway` — Priority 2–3 Open API `/features/flood/{1day,3days,7days,30days}` + flood-freq, then VIIRS / burn-scar / burn-freq. Catalog works without a key; GeoJSON needs GISTDA_API_KEY. Not `/app-api/proxy`.
+- `gistda-gflood` — Priority 1 Open API flood WMS/WMTS/TMS (1/3/7/30-day), then fire/drought maps. STAC + Sentinel-1C/1D download are priority 5 retrospective, not a live tile CDN.
 
 **Orbital & Air Traffic**:
 - `opensky-network` — Live ADS-B, direct from OpenSky (no key) 🟢
@@ -138,6 +145,7 @@ Enable relevant modules in `src/modules/registry.ts` by keeping/removing entries
 
 **Environmental**:
 - `open-meteo-aqi` — Air quality, direct from Open-Meteo (no key) 🟢
+- `open-meteo-forecast` — 7-day NWP forecast for Thai civic cities (free, modelled)
 - `openaq` — Global AQ stations (free, no key)
 - `aqicn-thailand` — Thai PM2.5 stations (free, no key)
 - `tmd-weather` — Thai Met Dept forecasts (free, no key)
