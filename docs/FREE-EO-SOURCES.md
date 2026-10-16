@@ -125,8 +125,8 @@ From `src/basemaps/basemap-catalog.ts` (already in the template):
 | OpenStreetMap | `https://tile.openstreetmap.org/{z}/{x}/{y}.png` | No | OpenStreetMap contributors |
 | ESRI World Imagery | `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}` | No | Esri, Maxar, Earthstar Geographics |
 | ESRI World Topo | `https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}` | No | Esri |
-| CARTO Positron | `https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png` | No | CARTO |
-| CARTO Dark Matter | `https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png` | No | CARTO |
+| CARTO Positron | `https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png` | **Yes (since 2026)** | CARTO |
+| CARTO Dark Matter | `https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png` | **Yes (since 2026)** | CARTO |
 | Longdo Map | `https://ms.longdo.com/mmmap/tile.php?...` | `LONGDO_MAP_KEY` | Metamedia Technology / LongDo Map |
 | Mapbox | `mapbox://styles/...` | `NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN` | Mapbox |
 | Stadia / Stamen | `https://tiles.stadiamaps.com/tiles/...` | `STADIA_API_KEY` | Stadia Maps, Stamen Design, OSM |

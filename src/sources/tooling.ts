@@ -198,7 +198,7 @@ export const TOOLING: DataSource[] = [
     useWhen:
       "You want a proper vector basemap without a Mapbox account or usage billing.",
     howTo:
-      "Free styles from demotiles.maplibre.org or basemaps.cartocdn.com need no key. The toolkit's basemap fallback chain in `src/basemaps/basemap-catalog.ts` prefers keyless styles and only uses Mapbox if a token happens to be set.",
+      "Free styles from demotiles.maplibre.org or tiles.openfreemap.org need no key (basemaps.cartocdn.com now requires a CARTO API key). The toolkit's basemap fallback chain in `src/basemaps/basemap-catalog.ts` prefers keyless styles and only uses Mapbox if a token happens to be set.",
     seeAlso: ["deckgl"],
   },
 

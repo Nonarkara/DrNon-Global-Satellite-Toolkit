@@ -264,7 +264,7 @@ Keyless, global, stable and actively maintained. Everything in this tier works f
 | Portal | https://github.com/maplibre/maplibre-gl-js |
 | Docs | https://maplibre.org/maplibre-gl-js/docs/ |
 
-**How to use it.** Free styles from demotiles.maplibre.org or basemaps.cartocdn.com need no key. The toolkit's basemap fallback chain in `src/basemaps/basemap-catalog.ts` prefers keyless styles and only uses Mapbox if a token happens to be set.
+**How to use it.** Free styles from demotiles.maplibre.org or tiles.openfreemap.org need no key (basemaps.cartocdn.com now requires a CARTO API key). The toolkit's basemap fallback chain in `src/basemaps/basemap-catalog.ts` prefers keyless styles and only uses Mapbox if a token happens to be set.
 
 <sub>Last probed 2026-09-06 — ★11544, last push 2026-09-05.</sub>
 

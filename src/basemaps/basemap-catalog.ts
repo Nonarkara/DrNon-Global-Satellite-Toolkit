@@ -173,14 +173,14 @@ export const basemapCatalog: BasemapDescriptor[] = [
     style: "raster",
   },
 
-  // Priority 5: CartoDB (free, no token)
+  // Priority 5: keyless light/dark bases (CARTO is now key-gated: OSM standard + Esri Dark Gray)
   {
     id: "carto-positron",
-    label: "CartoDB Positron",
+    label: "OpenStreetMap (light)",
     description: "Clean, minimal light base map. Good for data-heavy overlays.",
-    tileUrl: "https://basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png",
-    attribution: "CARTO",
-    maxZoom: 20,
+    tileUrl: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+    attribution: "© OpenStreetMap contributors",
+    maxZoom: 19,
     requiresToken: false,
     priority: 5,
     style: "raster",
@@ -188,11 +188,11 @@ export const basemapCatalog: BasemapDescriptor[] = [
   },
   {
     id: "carto-dark-matter",
-    label: "CartoDB Dark Matter",
+    label: "Esri Dark Gray",
     description: "Dark minimal base map for night/operations themes.",
-    tileUrl: "https://basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png",
-    attribution: "CARTO",
-    maxZoom: 20,
+    tileUrl: "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}",
+    attribution: "© Esri, HERE, Garmin · © OpenStreetMap contributors",
+    maxZoom: 16,
     requiresToken: false,
     priority: 5,
     style: "raster",
